@@ -1,0 +1,3 @@
+[submodule "TrainsProtocol"]
+	path = TrainsProtocol
+	url = https://github.com/simatic/TrainsProtocol.git

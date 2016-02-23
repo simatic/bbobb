@@ -1,0 +1,9 @@
+*~
+*.bak
+*.BAK
+*.o
+depend
+html
+doc
+# All that is generated
+lib

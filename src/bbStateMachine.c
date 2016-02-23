@@ -1,4 +1,4 @@
-#include <assert.h>
+#include "bbError.h"
 #include "bbStateMachine.h"
 #include "bbMsg.h"
 
@@ -19,14 +19,36 @@ BbStateMachineFunc bbTransitions[BB_LAST_STATE+1][BB_LAST_MSG+1] = {
 };
 
 void bbStateMachineTransition(BbMsg* pMsg){
-  assert( (pMsg->type >= 0) && (pMsg->type <= BB_LAST_MSG) );
-  assert( (bbAutomatonState >= 0) && (bbAutomatonState <= BB_LAST_STATE) );
+  if ( (pMsg->type < 0) || (pMsg->type > BB_LAST_MSG) ) {
+    bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+			       __FILE__,
+			       __LINE__,
+			       "pMsg->type == %d which is outside interval [%d,%d]",
+			       pMsg->type,
+			       0,
+			       BB_LAST_MSG);
+  }
+  if ( (bbAutomatonState < 0) || (bbAutomatonState > BB_LAST_STATE) ) {
+    bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+			       __FILE__,
+			       __LINE__,
+			       "bbAutomatonState == %d which is outside interval [%d,%d]",
+			       bbAutomatonState,
+			       0,
+			       BB_LAST_STATE);
+  }
   bbAutomatonState = (*bbTransitions[bbAutomatonState][pMsg->type])(bbAutomatonState, pMsg);
 }
 
 BbState bbError(BbState state, BbMsg* pMsg){
-  fprintf(stderr, "Received unexpected message %d in state %d\n", state, pMsg->type);
-  abort();
+  bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+			     __FILE__,
+			     __LINE__,
+			     "%s function has been called because state machine received unexpected message %d in state %d\n",
+			     __func__,
+			     state,
+			     pMsg->type);
+  return BB_STATE_ALONE; 
 }
 
 BbState bbProcessRecover(BbState state, BbMsg* pMsg){

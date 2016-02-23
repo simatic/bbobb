@@ -56,6 +56,9 @@ $(DYNAMIC_LIB): $(OBJECTS_DYNAMIC)
 $(JNI_LIB): $(DYNAMIC_LIB)
 	ln -s $(DYNAMIC_LIB) $(JNI_LIB)
 
+bbError_dyn.o: bbError.c
+	$(CC) $(CFLAGS) $^  -c -o $@
+
 bbStateMachine_dyn.o: bbStateMachine.c
 	$(CC) $(CFLAGS) $^  -c -o $@
 

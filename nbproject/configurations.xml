@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="97">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <df name="include">
+        <in>bbComm.h</in>
+        <in>bbInterface.h</in>
+      </df>
+      <df name="src">
+        <in>bbComm.c</in>
+        <in>bbError.c</in>
+        <in>bbInterface.c</in>
+        <in>bbStateMachine.c</in>
+      </df>
+      <df name="TrainsProtocol">
+        <df name="src">
+          <in>address.c</in>
+          <in>advanced_struct.c</in>
+          <in>applicationMessage.c</in>
+          <in>bqueue.c</in>
+          <in>comm.c</in>
+          <in>connect.c</in>
+          <in>counter.c</in>
+          <in>interface.c</in>
+          <in>iomsg.c</in>
+          <in>list.c</in>
+          <in>management_addr.c</in>
+          <in>msg.c</in>
+          <in>signalArrival.c</in>
+          <in>stateMachine.c</in>
+          <in>wagon.c</in>
+        </df>
+        <df name="tests">
+          <df name="integration">
+            <df name="basic">
+              <in>basicTest.c</in>
+            </df>
+            <df name="clientServer">
+              <in>client.c</in>
+              <in>server.c</in>
+            </df>
+            <df name="insertion">
+              <in>insertion.c</in>
+            </df>
+            <df name="JNIperf">
+              <in>JNIperf.c</in>
+            </df>
+            <df name="latency">
+              <in>latency.c</in>
+              <in>latencyData.c</in>
+            </df>
+            <df name="perf">
+              <in>perf.c</in>
+            </df>
+            <df name="trainTime">
+              <in>client.c</in>
+              <in>server.c</in>
+              <in>trainTime.c</in>
+            </df>
+            <df name="wagonFiller">
+              <in>wagonFiller.c</in>
+            </df>
+          </df>
+          <df name="unit">
+            <in>testAddress.c</in>
+            <in>testApplicationMessage_wagon.c</in>
+            <in>testBqueue.c</in>
+            <in>testComm.c</in>
+            <in>testList.c</in>
+            <in>testManagement_addr.c</in>
+          </df>
+        </df>
+      </df>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>nbproject/private/launcher.properties</itemPath>
+      <itemPath>makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f makefile</buildCommand>
+          <cleanCommand>${MAKE} -f makefile clean</cleanCommand>
+          <executablePath></executablePath>
+        </makeTool>
+        <preBuild>
+          <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
+          <preBuildCommand></preBuildCommand>
+        </preBuild>
+      </makefileType>
+      <item path="TrainsProtocol/src/address.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/advanced_struct.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/applicationMessage.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/bqueue.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/comm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/connect.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/counter.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/interface.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/iomsg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/list.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/management_addr.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/msg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/signalArrival.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/stateMachine.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/src/wagon.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/JNIperf/JNIperf.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/basic/basicTest.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/clientServer/client.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/clientServer/server.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/insertion/insertion.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/latency/latency.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/latency/latencyData.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/perf/perf.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/trainTime/client.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/trainTime/server.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/trainTime/trainTime.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/integration/wagonFiller/wagonFiller.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/unit/testAddress.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/unit/testApplicationMessage_wagon.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/unit/testBqueue.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/unit/testComm.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/unit/testList.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="TrainsProtocol/tests/unit/testManagement_addr.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="include/bbComm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include/bbInterface.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/bbComm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/bbError.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/bbInterface.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/bbStateMachine.c" ex="false" tool="0" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

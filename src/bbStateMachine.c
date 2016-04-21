@@ -1,9 +1,12 @@
 #include "bbError.h"
 #include "bbStateMachine.h"
 #include "bbMsg.h"
+#include <error.h>
 
 BbState bbAutomatonState = BB_STATE_WAIT_VIEW_CHANGE;
 
+int bbAutomatonInit();
+void bbMsgTreatement(trBqueue * msgToTreatQueue);
 BbState bbError(BbState, BbMsg*);
 BbState bbProcessRecover(BbState, BbMsg*);
 BbState bbProcessSet(BbState, BbMsg*);
@@ -14,9 +17,37 @@ BbStateMachineFunc bbTransitions[BB_LAST_STATE+1][BB_LAST_MSG+1] = {
   /*      State  /  Received msg :    BB_MSG_RECOVER             BB_MSG_SET                 BB_MSG_VIEW_CHANGE            */
   /* BB_STATE_ALONE              */ { bbError,                   bbError,                   bbProcessViewChange },
   /* BB_STATE_SEVERAL            */ { bbError,                   bbProcessSet,              bbProcessViewChange },
-  /* BB_STATE_MANAGE_VIEW_CHANGE */ { bbProcessRecover,          bbSaveSet,                 bbProcessViewChange },
-  /* BB_STATE_WAIT_VIEW_CHANGE   */ { bbError,                   bbError,                   bbProcessViewChange }
+  /* BB_STATE_VIEW_CHANGE        */ { bbProcessRecover,          bbSaveSet,                 bbProcessViewChange }
 };
+
+void bbAutomatonInit(){
+    int error;
+    trComm * bbCommForAccept = NULL;
+    trBqueue * bbMsgQueue = newBqueue();
+    bbCommForAccept = commNewForAccept(8000);
+    
+    pthread_t msgTreatementThread;
+    error = pthread_create(&msgTreatementThread, NULL, bbMsgTreatement, bbMsgQueue);
+    if(!error){
+        perror("pthread_create");
+        return EXIT_FAILURE;
+    }
+    
+    bbQueueComm QCForAcceptThread;
+    QCForAcceptThread.comm = trComm;
+    QCForAcceptThread.queue = bbMsgQueue;
+    pthread_t waitCommForAcceptThread;
+    error = pthread_create(&waitCommForAcceptThread, NULL, waitCommForAccept, QCForAcceptThread);
+    if(!error){
+        perror("pthread_create");
+        return EXIT_FAILURE;
+    };
+        
+    /*TO DO : Others StateMachine Init*/
+    
+    trInit();
+    
+}
 
 void bbStateMachineTransition(BbMsg* pMsg){
   if ( (pMsg->type < 0) || (pMsg->type > BB_LAST_MSG) ) {

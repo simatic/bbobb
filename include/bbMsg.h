@@ -73,4 +73,27 @@ typedef struct {
   }body;/**<A union between all the types of possible messages */
 }__attribute__((packed)) BbMsg;
 
+/*
+ * @brief Description of the structure wich will be placed before the messages
+ * @note Holds two paameters : a @a mutex to control the writting and a @a counter
+ */
+typedef prefix ControlSharing;
+
+/*
+ * @brief Data structure used to improve message's traitement in automaton
+ * @note TO DO
+ */
+typedef struct {
+    ControlSharing prefix;
+    BbMsg msg;
+}__attribute__((packed)) BbSharedMsg;
+
+/*
+ * @brief Data structure used to deliver batchs to applicationnal level
+ */
+typedef struct {
+   BbSharedMsg* msg;
+   BbBatch* batch;
+}__attribute__((packed)) BatchInSharedMsg;
+
 #endif /* _BB_MSG_H */

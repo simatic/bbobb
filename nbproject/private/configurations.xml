@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="97">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <df name="include">
+        <in>bbComm.h</in>
+        <in>bbError.h</in>
+        <in>bbInterface.h</in>
+        <in>bbMsg.h</in>
+        <in>bbStateMachine.h</in>
+      </df>
+      <df name="src">
+        <in>bbComm.c</in>
+        <in>bbError.c</in>
+        <in>bbInterface.c</in>
+        <in>bbStateMachine.c</in>
+      </df>
+      <df name="TrainsProtocol">
+        <df name=".settings">
+        </df>
+        <df name="doc">
+        </df>
+        <df name="include">
+          <in>address.h</in>
+          <in>advanced_struct.h</in>
+          <in>applicationMessage.h</in>
+          <in>bqueue.h</in>
+          <in>comm.h</in>
+          <in>common.h</in>
+          <in>connect.h</in>
+          <in>counter.h</in>
+          <in>errorTrains.h</in>
+          <in>interface.h</in>
+          <in>iomsg.h</in>
+          <in>jniContext.h</in>
+          <in>list.h</in>
+          <in>management_addr.h</in>
+          <in>msg.h</in>
+          <in>signalArrival.h</in>
+          <in>stateMachine.h</in>
+          <in>trains.h</in>
+          <in>wagon.h</in>
+        </df>
+        <df name="src">
+          <in>address.c</in>
+          <in>advanced_struct.c</in>
+          <in>applicationMessage.c</in>
+          <in>bqueue.c</in>
+          <in>comm.c</in>
+          <in>connect.c</in>
+          <in>counter.c</in>
+          <in>interface.c</in>
+          <in>iomsg.c</in>
+          <in>list.c</in>
+          <in>management_addr.c</in>
+          <in>msg.c</in>
+          <in>signalArrival.c</in>
+          <in>stateMachine.c</in>
+          <in>wagon.c</in>
+        </df>
+        <df name="tests">
+          <df name="integration">
+            <df name="basic">
+              <in>basicTest.c</in>
+            </df>
+            <df name="clientServer">
+              <in>client.c</in>
+              <in>server.c</in>
+            </df>
+            <df name="insertion">
+              <in>insertion.c</in>
+            </df>
+            <df name="JNIperf">
+              <in>JNIperf.c</in>
+              <in>perf_InterfaceJNI.h</in>
+            </df>
+            <df name="latency">
+              <df name="scripts">
+              </df>
+              <in>latency.c</in>
+              <in>latencyData.c</in>
+              <in>latencyData.h</in>
+            </df>
+            <df name="perf">
+              <in>perf.c</in>
+            </df>
+            <df name="trainTime">
+              <in>client.c</in>
+              <in>server.c</in>
+              <in>trainTime.c</in>
+              <in>trainTime.h</in>
+            </df>
+            <df name="wagonFiller">
+              <in>wagonFiller.c</in>
+            </df>
+          </df>
+          <df name="unit">
+            <in>testAddress.c</in>
+            <in>testApplicationMessage_wagon.c</in>
+            <in>testBqueue.c</in>
+            <in>testComm.c</in>
+            <in>testList.c</in>
+            <in>testManagement_addr.c</in>
+          </df>
+        </df>
+      </df>
+    </df>
+  </logicalFolder>
+  <projectmakefile>makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <platform>2</platform>
+      </toolsSet>
+      <compile>
+        <compiledirpicklist>
+          <compiledirpicklistitem>.</compiledirpicklistitem>
+          <compiledirpicklistitem>${AUTO_FOLDER}</compiledirpicklistitem>
+        </compiledirpicklist>
+        <compiledir>${AUTO_FOLDER}</compiledir>
+        <compilecommandpicklist>
+          <compilecommandpicklistitem>${MAKE} ${ITEM_NAME}.o</compilecommandpicklistitem>
+          <compilecommandpicklistitem>${AUTO_COMPILE}</compilecommandpicklistitem>
+        </compilecommandpicklist>
+        <compilecommand>${AUTO_COMPILE}</compilecommand>
+      </compile>
+      <dbx_gdbdebugger version="1">
+        <gdb_pathmaps>
+        </gdb_pathmaps>
+        <gdb_interceptlist>
+          <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
+        </gdb_interceptlist>
+        <gdb_options>
+          <DebugOptions>
+          </DebugOptions>
+        </gdb_options>
+        <gdb_buildfirst gdb_buildfirst_overriden="false" gdb_buildfirst_old="false"/>
+      </dbx_gdbdebugger>
+      <nativedebugger version="1">
+        <engine>gdb</engine>
+      </nativedebugger>
+      <runprofile version="9">
+        <runcommandpicklist>
+          <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
+        </runcommandpicklist>
+        <runcommand>"${OUTPUT_PATH}"</runcommand>
+        <rundir>.</rundir>
+        <buildfirst>false</buildfirst>
+        <terminal-type>0</terminal-type>
+        <remove-instrumentation>0</remove-instrumentation>
+        <environment>
+        </environment>
+      </runprofile>
+    </conf>
+  </confs>
+</configurationDescriptor>

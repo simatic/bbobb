@@ -1,0 +1,6 @@
+Possible make targets :
+   - all                    : compile the middleware library and its tests
+   - allWithInstrumentation : compile the middleware library and its tests, with instrumentation code (which slows down the library, but allows fine-grained performance measures)
+   - clean                  : remove all temporary files
+   - doxygen                : generate the doxygen doc in doc/doxygen
+   - cleandoxygen           : remove the doc/doxygen directory

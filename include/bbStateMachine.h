@@ -8,6 +8,7 @@
 #ifndef _BB_STATE_MACHINE_H
 #define _BB_STATE_MACHINE_H
 
+#include <pthread.h>
 #include "bbMsg.h"
 
 /**
@@ -19,6 +20,11 @@ typedef enum {
   BB_STATE_MANAGE_VIEW_CHANGE, /**< Managing a view change */
   BB_STATE_WAIT_VIEW_CHANGE    /**< Just started ==> waiting for a view change */
 } BbState;
+
+typedef struct {
+    trBqueue * queue;
+    trComm * comm;
+} bbQueueComm;
 
 #define BB_LAST_STATE BB_STATE_WAIT_VIEW_CHANGE
 
@@ -37,5 +43,7 @@ typedef  BbState (*BbStateMachineFunc)(BbState, BbMsg*);
  * @param[in] pMsg Message to be processed by state machine
  */
 void bbStateMachineTransition(BbMsg* pMsg);
+
+int bbAutomatonInit();
 
 #endif /* _BB_STATE_MACHINE_H */

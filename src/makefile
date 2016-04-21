@@ -60,7 +60,7 @@ bbError_dyn.o: bbError.c
 	$(CC) $(CFLAGS) $^  -c -o $@
 
 bbStateMachine_dyn.o: bbStateMachine.c
-	$(CC) $(CFLAGS) $^  -c -o $@
+	$(CC) $(CFLAGS) $^  -c -o $@	
 
 clean:
 	rm -f *~ *.bak *.BAK 

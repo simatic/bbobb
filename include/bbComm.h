@@ -16,6 +16,9 @@
 
 #include "bbStateMachine.h"
 #include "comm.h"
+#include "bbMsg.h"
+
+#include <sys/uio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +28,7 @@ void waitCommForAccept(bbQueueComm QCForAcceptThread);
 
 void bbConnectionMgt(bbQueueComm QCForAcceptThread);
 
-
+BbSharedMsg * bbReceive(trComm * aComm);
 
 
 #ifdef __cplusplus

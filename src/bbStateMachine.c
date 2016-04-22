@@ -1,12 +1,14 @@
 #include "bbError.h"
 #include "bbStateMachine.h"
 #include "bbMsg.h"
+#include "bqueue.h"
 #include <error.h>
 
 BbState bbAutomatonState = BB_STATE_WAIT_VIEW_CHANGE;
 
 int bbAutomatonInit();
 void bbMsgTreatement(trBqueue * msgToTreatQueue);
+
 BbState bbError(BbState, BbMsg*);
 BbState bbProcessRecover(BbState, BbMsg*);
 BbState bbProcessSet(BbState, BbMsg*);
@@ -48,6 +50,18 @@ void bbAutomatonInit(){
     trInit();
     
 }
+
+void bbMsgTreatement(trBqueue * msgToTreatQueue){
+    womim * msg = NULL;
+    do {
+        msg = bqueueDequeue(msgToTreatQueue);
+        //bbStateMachineTransition(msg);
+        if(msg!=NULL){
+            printf("message reçus !");
+        }
+    }while(1);
+}
+
 
 void bbStateMachineTransition(BbMsg* pMsg){
   if ( (pMsg->type < 0) || (pMsg->type > BB_LAST_MSG) ) {

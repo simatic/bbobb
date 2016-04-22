@@ -14,7 +14,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <assert.h>
 
+#include "bbComm.h"
+#include "advanced_struct.h"
+#include "counter.h"
 
 void waitCommForAccept(bbQueueComm QCForAcceptThread){
     trComm * aComm;
@@ -27,9 +31,10 @@ void waitCommForAccept(bbQueueComm QCForAcceptThread){
 }
 
 void bbConnectionMgt(bbQueueComm QCForAcceptThread){
-    wowmim aMsg;
+    womim aMsg; /* TO DO : Changer en SharedMsg */
     do{
-        aMsg = receive()
-    
+        aMsg = receive();
+        bqueueEnqueue(QCForAcceptThread.queue, &aMsg);
+    }while(1); 
 }
 

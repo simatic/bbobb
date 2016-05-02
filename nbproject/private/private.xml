@@ -9,6 +9,19 @@
     </data>
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbError.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/Test/TestInit/Makefile</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/Test/TestInit/makefile2</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbStateMachine.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbobb.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbInterface.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbInterface.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/Test/TestInit/test.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/src/interface.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbStateMachine.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/src/comm.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbError.c</file>
+        </group>
     </open-files>
 </project-private>

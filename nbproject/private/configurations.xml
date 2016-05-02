@@ -10,13 +10,22 @@
         <in>bbStateMachine.h</in>
         <in>bbobb.h</in>
       </df>
+      <df name="lib">
+      </df>
       <df name="src">
         <in>bbComm.c</in>
         <in>bbError.c</in>
         <in>bbInterface.c</in>
+        <in>bbMsg.c</in>
         <in>bbStateMachine.c</in>
       </df>
       <df name="Test">
+        <df name="TestInit">
+          <df name="GNU-amd64-Linux">
+          </df>
+          <in>makefile</in>
+          <in>test.c</in>
+        </df>
         <df name="testUnitaireTempo">
           <in>Makefile</in>
           <in>bbComm-test.c</in>
@@ -29,6 +38,8 @@
         <df name=".settings">
         </df>
         <df name="doc">
+          <df name="doxygen">
+          </df>
         </df>
         <df name="include">
           <in>address.h</in>
@@ -50,6 +61,8 @@
           <in>stateMachine.h</in>
           <in>trains.h</in>
           <in>wagon.h</in>
+        </df>
+        <df name="lib">
         </df>
         <df name="src">
           <in>address.c</in>

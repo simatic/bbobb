@@ -4,24 +4,24 @@
 * @author May CATTANT - Quentin MONNOT - Victor ROUQUETTE - Michel SIMATIC
 * @date 23 february 2016
 */
-
+/*
 #include "bbMsg.h"
 
 BbBatch initBatch () {
     BbBatch batch;
     
     batch.len=sizeof(batch);   
-    batch.sender;  //A DEFINIR valeur par defaut
-    batch.messages[]=NULL; 
+    //batch.sender;  //A DEFINIR valeur par defaut
+    //batch.messages[]=NULL; 
     return batch;
 }
 
 
 BbBatch newBbBatch (address sender, message messages[]) {
     BbBatch batch=initBatch();
-    batch.len=sizeof(int)+sizeof(address)+sizeof(message);   
+    batch.len=sizeof(int)+sizeof(address)+sizeof(messages);   
     batch.sender= sender;
-    batch.messages[]=messages[]; 
+    batch.messages=messages[]; 
     
     return batch;
 }
@@ -81,3 +81,4 @@ BbSharedMsg newBbSharedMsg (BB_MType mtype, address sender, circuitView view, bo
   return(msg);
 
 }
+*/

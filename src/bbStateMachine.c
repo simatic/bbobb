@@ -4,8 +4,6 @@
 #include "bbComm.h"
 #include <error.h>
 
-BbState bbAutomatonState = BB_STATE_WAIT_VIEW_CHANGE;
-
 int bbAutomatonInit();
 
 BbState bbError(BbState, BbMsg*);
@@ -40,9 +38,8 @@ int bbAutomatonInit(){
     bbQueueComm * QCForAcceptThread;
     QCForAcceptThread->comm = bbCommForAccept;
     QCForAcceptThread->queue = bbMsgQueue;
-    data = &QCForAcceptThread;
-    pthread_t waitCommForAcceptThread;
     data = QCForAcceptThread;
+    pthread_t waitCommForAcceptThread;
     error = pthread_create(&waitCommForAcceptThread, NULL, waitCommForAccept, data);
     if(!error){
         perror("pthread_create");
@@ -52,10 +49,10 @@ int bbAutomatonInit(){
     /*TO DO : Others StateMachine Init*/
     
     //trInit();
-    
+    return 0;
 }
 
-void bbMsgTreatement(void * data){
+void * bbMsgTreatement(void * data){ //TO DO rajouter mutex
     trBqueue * msgToTreatQueue = data;
     womim * msg = NULL;
     do {

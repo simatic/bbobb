@@ -16,6 +16,25 @@
 
 #include "bbStateMachine.h"
 
+/**
+ * @brief Max size of a set
+ */
+ extern int setMaxLen;
+
+/**
+ * @brief The limit of time to wait
+ */
+extern int bbWaitNbMax;
+
+/**
+ * @brief The default time to wait
+ */
+extern int bbWaitDefaultTime; /**<in microsecond*/
+
+/**
+ * @brief Store the error number specific to errors in bbobb middleware
+ */
+extern int bbErrno;
 
 int bbInit();
 

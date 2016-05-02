@@ -21,7 +21,7 @@
 #include "counter.h"
 #include "iomsg.h"
 
-void waitCommForAccept(void * data){
+void * waitCommForAccept(void * data){
     trComm * aComm;
     int error;
     bbQueueComm * QCForAcceptThread = data;
@@ -33,7 +33,7 @@ void waitCommForAccept(void * data){
     }while(1);
 }
 
-void bbConnectionMgt(void * data){
+void * bbConnectionMgt(void * data){
     
     womim * aMsg; /* TO DO : Changer en SharedMsg */
     do{

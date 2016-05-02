@@ -1,0 +1,64 @@
+## -*- Makefile -*-
+##
+## User: terag
+## Time: May 2, 2016 4:40:18 PM
+## Makefile created by Oracle Solaris Studio.
+##
+## This file is generated automatically.
+##
+
+
+#### Compiler and tool definitions shared by all build targets #####
+CC = gcc
+BASICOPTS = -g
+CFLAGS = $(BASICOPTS)
+
+
+# Define the target directories.
+TARGETDIR_testInit=GNU-amd64-Linux
+
+
+all: $(TARGETDIR_testInit)/testInit
+
+## Target: testInit
+CPPFLAGS_testInit = \
+	-I../../include/. \
+	-I../../TrainsProtocol/include/.
+OBJS_testInit =  \
+	$(TARGETDIR_testInit)/test.o
+SYSLIBS_testInit = -static -lpthread 
+USERLIBS_testInit = ../../TrainsProtocol/lib/libtrains.a ../../lib/libbbobb.a $(SYSLIBS_testInit) 
+#DEPLIBS_testInit = ../../TrainsProtocol/lib/libtrains.a  ../../lib/libbbobb.a ../../TrainsProtocol/lib/libtrains.a  
+DEPLIBS_testInit = ../../src/bbComm.o ../../src/bbError.o ../../src/bbInterface.o ../../src/bbMsg.o ../../src/bbStateMachine.o ../../TrainsProtocol/lib/libtrains.a  
+LDLIBS_testInit = $(USERLIBS_testInit)
+LIBS  = -Wl,-Bstatic -L../../../lib -ltrains -L../../lib -ltrains -Wl,-Bdynamic -pthread
+
+
+# Link or archive
+$(TARGETDIR_testInit)/testInit: $(TARGETDIR_testInit) $(OBJS_testInit) $(DEPLIBS_testInit)
+	$(LINK.c) $(CFLAGS_testInit) $(CPPFLAGS_testInit) -o $@ $(OBJS_testInit) $(LDLIBS_testInit)
+
+
+# Compile source files into .o files
+$(TARGETDIR_testInit)/test.o: $(TARGETDIR_testInit) test.c
+	$(COMPILE.c) $(CFLAGS_testInit) $(CPPFLAGS_testInit) -o $@ test.c
+
+
+
+#### Clean target deletes all generated files ####
+clean:
+	rm -f \
+		$(TARGETDIR_testInit)/testInit \
+		$(TARGETDIR_testInit)/test.o
+	rm -f -r $(TARGETDIR_testInit)
+
+
+# Create the target directory (if needed)
+$(TARGETDIR_testInit):
+	mkdir -p $(TARGETDIR_testInit)
+
+
+# Enable dependency checking
+.KEEP_STATE:
+.KEEP_STATE_FILE:.make.state.GNU-amd64-Linux
+

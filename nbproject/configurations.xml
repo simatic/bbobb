@@ -12,6 +12,15 @@
         <in>bbInterface.c</in>
         <in>bbStateMachine.c</in>
       </df>
+      <df name="Test">
+        <df name="testUnitaireTempo">
+          <in>Makefile</in>
+          <in>bbComm-test.c</in>
+          <in>bbInterface-test.c</in>
+          <in>bbStateMachine-test.c</in>
+          <in>testConnection.c</in>
+        </df>
+      </df>
       <df name="TrainsProtocol">
         <df name="src">
           <in>address.c</in>
@@ -106,6 +115,28 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
+      <item path="Test/testUnitaireTempo/Makefile" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Test/testUnitaireTempo/bbComm-test.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="Test/testUnitaireTempo/bbInterface-test.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="Test/testUnitaireTempo/bbStateMachine-test.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="Test/testUnitaireTempo/testConnection.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="TrainsProtocol/src/address.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="TrainsProtocol/src/advanced_struct.c"
@@ -238,8 +269,6 @@
       <item path="include/bbComm.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/bbInterface.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="include/bbobb.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/bbComm.c" ex="false" tool="0" flavor2="0">
       </item>

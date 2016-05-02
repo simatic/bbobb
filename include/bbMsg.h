@@ -10,6 +10,7 @@
 
 #include "address.h"
 #include "applicationMessage.h"
+#include "advanced_struct.h"
 
 /**
 * @brief Data structure for BB_MType (not defined as an enum in order to use only

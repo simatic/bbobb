@@ -19,22 +19,26 @@
 #include "bbComm.h"
 #include "advanced_struct.h"
 #include "counter.h"
+#include "iomsg.h"
 
-void waitCommForAccept(bbQueueComm QCForAcceptThread){
+void waitCommForAccept(void * data){
     trComm * aComm;
+    int error;
+    bbQueueComm * QCForAcceptThread = data;
     do{
-        aComm = commAccept(&QCForAcceptThread.comm);
+        aComm = commAccept(QCForAcceptThread->comm);
         pthread_t connectionMgtThread;
-        error = pthread_create(&connectionMgtThread, NULL, bbConnectionMgt(), NULL);
+        error = pthread_create(&connectionMgtThread, NULL, bbConnectionMgt, data);
         pthread_detach(connectionMgtThread);
     }while(1);
 }
 
-void bbConnectionMgt(bbQueueComm QCForAcceptThread){
-    womim aMsg; /* TO DO : Changer en SharedMsg */
+void bbConnectionMgt(void * data){
+    
+    womim * aMsg; /* TO DO : Changer en SharedMsg */
     do{
-        aMsg = receive();
-        bqueueEnqueue(QCForAcceptThread.queue, &aMsg);
+        aMsg = receive(QCForAcceptThread->comm);
+        bqueueEnqueue(QCForAcceptThread->queue, &aMsg);
     }while(1); 
 }
 

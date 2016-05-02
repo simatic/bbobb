@@ -17,11 +17,21 @@
 #include "bbStateMachine.h"
 #include "bbError.h"
 
+int bbInit();
+
 sem_t *bbSem_init_done;
 
 int bbErrno;
 
-int bbInit(){
-    bbAutomatonInit();
+int main(int argc, char* argv[]){
+    bbInit();
     
+    return 0;
+}
+
+int bbInit(){
+   
+    int error = bbAutomatonInit();
+    
+    return 0;   
 }

@@ -15,8 +15,8 @@
 #define BBCOMM_H
 
 #include "bbStateMachine.h"
-#include "comm.h"
 #include "bbMsg.h"
+#include "comm.h"
 
 #include <sys/uio.h>
 
@@ -24,9 +24,9 @@
 extern "C" {
 #endif
 
-void waitCommForAccept(bbQueueComm QCForAcceptThread);
+void waitCommForAccept(void * data);
 
-void bbConnectionMgt(bbQueueComm QCForAcceptThread);
+void bbConnectionMgt(void * data);
 
 BbSharedMsg * bbReceive(trComm * aComm);
 

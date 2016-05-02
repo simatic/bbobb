@@ -10,6 +10,8 @@
 
 #include <pthread.h>
 #include "bbMsg.h"
+#include "bqueue.h"
+#include "comm.h"
 
 /**
 * @brief Data structure for BbState
@@ -49,5 +51,7 @@ extern bbQueueComm * QCForAcceptThread;
 void bbStateMachineTransition(BbMsg* pMsg);
 
 int bbAutomatonInit();
+
+void bbMsgTreatement(void * data);
 
 #endif /* _BB_STATE_MACHINE_H */

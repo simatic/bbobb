@@ -1,13 +1,12 @@
 #include "bbError.h"
 #include "bbStateMachine.h"
 #include "bbMsg.h"
-#include "bqueue.h"
+#include "bbComm.h"
 #include <error.h>
 
 BbState bbAutomatonState = BB_STATE_WAIT_VIEW_CHANGE;
 
 int bbAutomatonInit();
-void bbMsgTreatement(trBqueue * msgToTreatQueue);
 
 BbState bbError(BbState, BbMsg*);
 BbState bbProcessRecover(BbState, BbMsg*);
@@ -22,24 +21,29 @@ BbStateMachineFunc bbTransitions[BB_LAST_STATE+1][BB_LAST_MSG+1] = {
   /* BB_STATE_VIEW_CHANGE        */ { bbProcessRecover,          bbSaveSet,                 bbProcessViewChange }
 };
 
-void bbAutomatonInit(){
+int bbAutomatonInit(){
     int error;
+    void * data = NULL;
     trComm * bbCommForAccept = NULL;
     trBqueue * bbMsgQueue = newBqueue();
-    bbCommForAccept = commNewForAccept(8000);
+    char port[] = "8000";
+    bbCommForAccept = commNewForAccept(port);
     
     pthread_t msgTreatementThread;
-    error = pthread_create(&msgTreatementThread, NULL, bbMsgTreatement, bbMsgQueue);
+    data = bbMsgQueue;
+    error = pthread_create(&msgTreatementThread, NULL, bbMsgTreatement, data);
     if(!error){
         perror("pthread_create");
         return EXIT_FAILURE;
     }
     
-    bbQueueComm QCForAcceptThread;
-    QCForAcceptThread.comm = trComm;
-    QCForAcceptThread.queue = bbMsgQueue;
+    bbQueueComm * QCForAcceptThread;
+    QCForAcceptThread->comm = bbCommForAccept;
+    QCForAcceptThread->queue = bbMsgQueue;
+    data = &QCForAcceptThread;
     pthread_t waitCommForAcceptThread;
-    error = pthread_create(&waitCommForAcceptThread, NULL, waitCommForAccept, QCForAcceptThread);
+    data = QCForAcceptThread;
+    error = pthread_create(&waitCommForAcceptThread, NULL, waitCommForAccept, data);
     if(!error){
         perror("pthread_create");
         return EXIT_FAILURE;
@@ -47,11 +51,12 @@ void bbAutomatonInit(){
         
     /*TO DO : Others StateMachine Init*/
     
-    trInit();
+    //trInit();
     
 }
 
-void bbMsgTreatement(trBqueue * msgToTreatQueue){
+void bbMsgTreatement(void * data){
+    trBqueue * msgToTreatQueue = data;
     womim * msg = NULL;
     do {
         msg = bqueueDequeue(msgToTreatQueue);

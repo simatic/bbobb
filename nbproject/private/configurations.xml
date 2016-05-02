@@ -8,12 +8,22 @@
         <in>bbInterface.h</in>
         <in>bbMsg.h</in>
         <in>bbStateMachine.h</in>
+        <in>bbobb.h</in>
       </df>
       <df name="src">
         <in>bbComm.c</in>
         <in>bbError.c</in>
         <in>bbInterface.c</in>
         <in>bbStateMachine.c</in>
+      </df>
+      <df name="Test">
+        <df name="testUnitaireTempo">
+          <in>Makefile</in>
+          <in>bbComm-test.c</in>
+          <in>bbInterface-test.c</in>
+          <in>bbStateMachine-test.c</in>
+          <in>testConnection.c</in>
+        </df>
       </df>
       <df name="TrainsProtocol">
         <df name=".settings">

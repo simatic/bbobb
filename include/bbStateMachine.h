@@ -96,6 +96,10 @@ extern circuitView bbView;
  */
 extern pthread_mutex_t viewChangeMutex;
 
+extern trComm * bbCommForAccept;
+extern trBqueue * bbMsgQueue;
+extern bbQueueComm * QCForAcceptThread;
+
 /** 
  * @brief Execute a transition of state machine based on @a pMsg
  * @param[in] pMsg Message to be processed by state machine

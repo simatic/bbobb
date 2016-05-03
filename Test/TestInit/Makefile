@@ -16,7 +16,7 @@ CFLAGS = -Wall -g $(INCLUDEDIRS) $(GLOBALFLAGS)
 ifeq ($(UNAME), Linux)
    # "-Wl,-Bstatic" option is here to force linking with trains static lib ; "-Wl,-Bdynamic" specifies that other libraries will be dynamically linked
    # "-pthread" is required for linking on Linux
-   LIBS  = -Wl,-Bstatic -L../../TrainsProtocol/lib -L../../lib -ltrains -Wl,-Bdynamic -pthread
+   LIBS  = -Wl,-Bstatic -L../../TrainsProtocol/lib -L../../lib -lbbobb -ltrains -Wl,-Bdynamic -pthread
 endif
 ifeq ($(UNAME), Darwin)
    # On MacOS, one must specify directly the name of the static library we want to link with. Moreover, you must have executed ranlib on this library (http://docstore.mik.ua/orelly/unix3/mac/ch05_05.htm), with "-c" option (that is "ranlib -c", see http://lists.gnu.org/archive/html/libtool/2002-07/msg00025.html)

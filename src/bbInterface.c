@@ -17,8 +17,6 @@
 #include "bbStateMachine.h"
 #include "bbError.h"
 
-int bbInit();
-
 sem_t *bbSem_init_done;
 
 int bbErrno;

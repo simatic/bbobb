@@ -4,7 +4,7 @@
 #include "bbComm.h"
 #include <error.h>
 
-int bbAutomatonInit();
+BbState bbAutomatonState;
 
 BbState bbError(BbState, BbMsg*);
 BbState bbProcessRecover(BbState, BbMsg*);

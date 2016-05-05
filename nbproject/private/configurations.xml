@@ -7,6 +7,7 @@
         <in>bbError.h</in>
         <in>bbInterface.h</in>
         <in>bbMsg.h</in>
+        <in>bbSingleton.h</in>
         <in>bbStateMachine.h</in>
         <in>bbobb.h</in>
       </df>
@@ -17,6 +18,7 @@
         <in>bbError.c</in>
         <in>bbInterface.c</in>
         <in>bbMsg.c</in>
+        <in>bbSingleton.c</in>
         <in>bbStateMachine.c</in>
       </df>
       <df name="Test">

@@ -32,7 +32,7 @@ typedef enum {
 typedef struct {
     trBqueue * queue;
     trComm * comm;
-} bbQueueComm;
+} BbSingleton;
 
 #define BB_LAST_STATE BB_STATE_VIEW_CHANGE
 
@@ -40,65 +40,6 @@ typedef struct {
  * @brief Type of function used to code transitions in state machine
  */
 typedef  BbState (*BbStateMachineFunc)(BbState, BbMsg*);
-
-extern trComm * bbCommForAccept;
-extern trBqueue * bbMsgQueue;
-extern bbQueueComm * QCForAcceptThread;
-
-/**
- * @brief Order used in BBOBB
- */
-extern BbOrder bbreqOrder;
-
-/**
- * @brief mutex used in statemachine
- */
-extern pthread_mutex_t bbStateMachineMutex;
-
-/**
-* @brief State of BBOBB automaton
-*/
-extern BbState bbAutomatonState;
-
-/**
- * @brief address of the host process
- */
-extern address bbMyAddress;
-
-/**
- * @brief current wave for automaton
- */
-extern unsigned char currentWave;
-
-/**
- * @brief current step in current wave
- */
-extern unsigned char currentStep;
-
-/**
- * @brief number of paticipants, max 256
- * @brief equal to size of view
- */
-extern unsigned char bbViewSize;
-
-/**
- * @brief true if automaton is init
- */
-extern bool bbInitDone;
-
-/**
- * @brief current view of participants
- */
-extern circuitView bbView;
-
-/**
- * @brief mutex used when view changes
- */
-extern pthread_mutex_t viewChangeMutex;
-
-extern trComm * bbCommForAccept;
-extern trBqueue * bbMsgQueue;
-extern bbQueueComm * QCForAcceptThread;
 
 /** 
  * @brief Execute a transition of state machine based on @a pMsg

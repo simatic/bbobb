@@ -24,9 +24,10 @@
 void * waitCommForAccept(void * data){
     trComm * aComm;
     int error;
-    bbQueueComm * QCForAcceptThread = data;
+    BbSingleton * singleton = data;
+    printf("ConnectionMgt : OK\n");
     do{
-        aComm = commAccept(QCForAcceptThread->comm);
+        aComm = commAccept(singleton->comm);
         pthread_t connectionMgtThread;
         error = pthread_create(&connectionMgtThread, NULL, bbConnectionMgt, data);
         pthread_detach(connectionMgtThread);
@@ -36,9 +37,11 @@ void * waitCommForAccept(void * data){
 void * bbConnectionMgt(void * data){
     
     womim * aMsg; /* TO DO : Changer en SharedMsg */
+    BbSingleton * singleton = data;
+    printf("ConnectionMgt : OK\n");
     do{
-        aMsg = receive(QCForAcceptThread->comm);
-        bqueueEnqueue(QCForAcceptThread->queue, &aMsg);
+        aMsg = receive(singleton->comm);
+        bqueueEnqueue(singleton->queue, &aMsg);
     }while(1); 
 }
 

@@ -5,11 +5,13 @@
       <df name="include">
         <in>bbComm.h</in>
         <in>bbInterface.h</in>
+        <in>bbSingleton.h</in>
       </df>
       <df name="src">
         <in>bbComm.c</in>
         <in>bbError.c</in>
         <in>bbInterface.c</in>
+        <in>bbSingleton.c</in>
         <in>bbStateMachine.c</in>
       </df>
       <df name="Test">
@@ -275,11 +277,15 @@
       </item>
       <item path="include/bbInterface.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="include/bbSingleton.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/bbComm.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="src/bbError.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="src/bbInterface.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/bbSingleton.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="src/bbStateMachine.c" ex="false" tool="0" flavor2="0">
       </item>

@@ -21,11 +21,11 @@ sem_t *bbSem_init_done;
 
 int bbErrno;
 
-int main(int argc, char* argv[]){
+/*int main(int argc, char* argv[]){
     bbInit();
     
     return 0;
-}
+}*/
 
 int bbInit(){
    

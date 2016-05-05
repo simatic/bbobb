@@ -22,33 +22,28 @@ BbStateMachineFunc bbTransitions[BB_LAST_STATE+1][BB_LAST_MSG+1] = {
 int bbAutomatonInit(){
     int error;
     void * data = NULL;
-    trComm * bbCommForAccept = NULL;
-    trBqueue * bbMsgQueue = newBqueue();
     char port[] = "8000";
-    bbCommForAccept = commNewForAccept(port);
+    BbSingleton * automatonInitSingleton = malloc(sizeof(trComm)+sizeof(trBqueue));
+    automatonInitSingleton->comm = commNewForAccept(port);
+    automatonInitSingleton->queue = newBqueue();
     
     pthread_t msgTreatementThread;
-    data = bbMsgQueue;
+    data = automatonInitSingleton->queue;
     error = pthread_create(&msgTreatementThread, NULL, bbMsgTreatement, data);
     if(!error){
-        perror("pthread_create");
+        perror("pthread_create for msgTreatementThread");
         return EXIT_FAILURE;
     }
     
-    bbQueueComm * QCForAcceptThread;
-    QCForAcceptThread->comm = bbCommForAccept;
-    QCForAcceptThread->queue = bbMsgQueue;
-    data = QCForAcceptThread;
+    data = automatonInitSingleton;
     pthread_t waitCommForAcceptThread;
     error = pthread_create(&waitCommForAcceptThread, NULL, waitCommForAccept, data);
     if(!error){
-        perror("pthread_create");
+        perror("pthread_create for waitCommForAcceptThread");
         return EXIT_FAILURE;
     };
+    printf("AutomatonInit : OK");
         
-    /*TO DO : Others StateMachine Init*/
-    
-    //trInit();
     return 0;
 }
 

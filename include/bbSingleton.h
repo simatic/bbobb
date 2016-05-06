@@ -16,60 +16,29 @@
 
 /*
  * @brief structure to contain all global var of bbobb
- * @BbOrder Order used in BBOBB
-
- * @brief mutex used in statemachine
- */
-/**
-* @brief State of BBOBB automaton
-*/
-/**
- * @brief address of the host process
- */
-
-/**
- * @brief current wave for automaton
- */
-
-/**
- * @brief current step in current wave
- */
-/**
- * @brief number of paticipants, max 256
- * @brief equal to size of view
- */
-/**
- * @brief true if automaton is init
- */
-/**
- * @brief current view of participants
- */
-/**
- * @brief mutex used when view changes
  */
 typedef struct {
-    BbOrder bbreqOrder;
+    bool bbInitDone; /*!<true if automaton is init>*/
+    int error; /*!<use to detect error in BBOBB*/
+    BbOrder bbreqOrder; /*!<Order used in BBOBB>*/
+    pthread_mutex_t bbStateMachineMutex; /*!<mutex used in statemachine>*/
+    BbState bbAutomatonState; /*!<State of BBOBB automaton>*/
+    address bbMyAddress; /*!<address of the host process>*/
+    unsigned char currentWave; /*!<current wave for automaton>*/
+    unsigned char currentStep; /*!<current step in current wave>*/
+    unsigned char bbViewSize; /*!<number of paticipants, max 256>*/
+    circuitView bbView; /*!<current view of participants>*/
+    pthread_mutex_t viewChangeMutex; /*!<mutex used when view changes>*/
+    trComm * bbCommForAccept; /*!<trComm used to accept connections>*/
+    trBqueue * bbMsgQueue; /*!<trBqueue used to store bbMsg before treatement>*/
+} BbSingleton;
 
-    pthread_mutex_t bbStateMachineMutex;
 
-    BbState bbAutomatonState;
-
-    address bbMyAddress;
-    unsigned char currentWave;
-    unsigned char currentStep;
-
-    unsigned char bbViewSize;
-
-    bool bbInitDone;
-
-    circuitView bbView;
-
-    pthread_mutex_t viewChangeMutex;
-
-    trComm * bbCommForAccept;
-    trBqueue * bbMsgQueue;
-    BbSingleton * singleton;
-}
+/*
+ * @brief initialisation of Singleton
+ * @return BbSingleton
+ */
+BbSingleton * bbSingletonInit();
 
 #endif /* BBSINGLETON_H */
 

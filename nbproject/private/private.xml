@@ -10,15 +10,18 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbInterface.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbError.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbStateMachine.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbSingleton.c</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbComm.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbMsg.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbInterface.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbSingleton.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbInterface.c</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/src/interface.c</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbStateMachine.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbError.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbStateMachine.h</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbError.h</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbInterface.h</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/src/comm.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbError.c</file>
         </group>
     </open-files>
 </project-private>

@@ -29,11 +29,6 @@ typedef enum {
     BB_UNIFORM_TOTAL_CAUSAL_ORDER
 } BbOrder;
 
-typedef struct {
-    trBqueue * queue;
-    trComm * comm;
-} BbSingleton;
-
 #define BB_LAST_STATE BB_STATE_VIEW_CHANGE
 
 /** 

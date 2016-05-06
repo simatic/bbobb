@@ -13,12 +13,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include "bbSingleton.h"
 
-/*
- * 
- */
-int main(int argc, char** argv) {
-
-    return (EXIT_SUCCESS);
+BbSingleton * bbSingletonInit() {
+    BbSingleton * singleton = NULL;
+    singleton = malloc(sizeof(BbSingleton));
+    
+    singleton->bbInitDone = false;
+    if(singleton->error = pthread_mutex_unlock(&(singleton->bbStateMachineMutex)) != 0){
+        perror("error with stateMachineMutex's init");
+    }
 }
-

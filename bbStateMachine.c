@@ -1,12 +1,16 @@
 #include "bbError.h"
 #include "bbStateMachine.h"
 #include "bbMsg.h"
-#include "bbComm.h"
-#include "bbSingleton.h"
 #include <error.h>
+// VAR STATICS setrecovered[], nbSetRcvd], waitingset
+// VAR EXTERNES view, sizeView, viewId
 
-BbState bbAutomatonState;
+// fonctions à faire: sizeview, newview
+//A ajouter = remplir waiting set, queue, etc
+BbState bbAutomatonState = BB_STATE_WAIT_VIEW_CHANGE;
 
+int bbAutomatonInit();
+void bbMsgTreatement(trBqueue * msgToTreatQueue);
 BbState bbError(BbState, BbMsg*);
 BbState bbProcessRecover(BbState, BbMsg*);
 BbState bbProcessSet(BbState, BbMsg*);
@@ -20,57 +24,34 @@ BbStateMachineFunc bbTransitions[BB_LAST_STATE+1][BB_LAST_MSG+1] = {
   /* BB_STATE_VIEW_CHANGE        */ { bbProcessRecover,          bbSaveSet,                 bbProcessViewChange }
 };
 
-int bbAutomatonInit(){
-    int error = 0;
-    void * data = NULL;
-    
-    if(bbSingletonInit()) {
-    bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
-			       __FILE__,
-			       __LINE__,
-			       "bbAutomatonStateInit error with singletonInit");
-    }
-    data = bbSingleton;
+void bbAutomatonInit(){
+    int error;
+    trComm * bbCommForAccept = NULL;
+    trBqueue * bbMsgQueue = newBqueue();
+    bbCommForAccept = commNewForAccept(8000);
     
     pthread_t msgTreatementThread;
-    error = pthread_create(&msgTreatementThread, NULL, bbMsgTreatement, data);
-    if(error){
-    bbErrorAtLine(  EXIT_FAILURE,
-                    error,
-                    __FILE__,
-                     __LINE__,
-                    "bbAutomatonStateInit error with msgTreatementThreadInit");
+    error = pthread_create(&msgTreatementThread, NULL, bbMsgTreatement, bbMsgQueue);
+    if(!error){
+        perror("pthread_create");
+        return EXIT_FAILURE;
     }
     
+    bbQueueComm QCForAcceptThread;
+    QCForAcceptThread.comm = trComm;
+    QCForAcceptThread.queue = bbMsgQueue;
     pthread_t waitCommForAcceptThread;
-    error = pthread_create(&waitCommForAcceptThread, NULL, waitCommForAccept, data);
-    if(error){
-    bbErrorAtLine(  EXIT_FAILURE,
-                    error,
-                    __FILE__,
-                    __LINE__,
-                    "bbAutomatonStateInit error waitCommForAcceptThread");
+    error = pthread_create(&waitCommForAcceptThread, NULL, waitCommForAccept, QCForAcceptThread);
+    if(!error){
+        perror("pthread_create");
+        return EXIT_FAILURE;
     };
-    
-    
-    printf("AutomatonInit : OK"\n);
         
-    return 0;
+    /*TO DO : Others StateMachine Init*/
+    
+    trInit();
+    
 }
-
-void * bbMsgTreatement(void * data){ //TO DO rajouter mutex
-    bbSingleton = data;
-    BbMsg * msg = malloc(sizeof(BbMsg));
-    do {
-        msg = bqueueDequeue(bbSingleton->msgQueue);
-        //bbStateMachineTransition(msg);
-        if(msg!=NULL){
-            printf("message reçus !");
-            bbStateMachineTransition(msg);
-        }
-    }while(1);
-}
-
 
 void bbStateMachineTransition(BbMsg* pMsg){
   if ( (pMsg->type < 0) || (pMsg->type > BB_LAST_MSG) ) {
@@ -106,23 +87,61 @@ BbState bbError(BbState state, BbMsg* pMsg){
 }
 
 BbState bbProcessRecover(BbState state, BbMsg* pMsg){
-  // TODO : To be completed
+    //int i;
+    if (pMsg->(body.BbRecover.view) == view) {
+       //??nbRecoverRcvd++
+       // if (pMsg->(body.BbRecover.initDone)){
+	// ?? viewIdInLastSignificantRecover = senderViewId
+ 	// if (pMsg->(body.BbRecover.wave) >= wave){
+ 	//   for(i=0, i<nbView, i++){
+	 //      if (rcvdAgg[set1.wave].get(agg.sender) == null then
+		  // We did not already receive the batch
+
+        if (nbRecoverRcvd == sizeView){
+        //forceDeliver()
+	//? sendAggForStep0()
+        // traiter les waiting set
+        }
+    
   return BB_STATE_ALONE; // TODO : Put the correct return value
 }
 
 BbState bbProcessSet(BbState state, BbMsg* pMsg){
-  // TODO : To be completed
+  //set de données à traiter
+    //a placer dans une queue
+    //creer tableau de double pointeur
   return BB_STATE_ALONE; // TODO : Put the correct return value
 }
 
 BbState bbProcessViewChange(BbState state, BbMsg* pMsg){
-  // TODO : To be completed
-  return BB_STATE_ALONE; // TODO : Put the correct return value
+    waitingSets = [];
+    view = newView();// TODO a definir le calcul de la nouvelle vue
+    if (initDone){
+        viewId += 1;
+    }
+    else{
+        viewId = 0;
+    }
+    if (size(newView) == 1){ //SIZE
+        if (initDone) {
+            waveMax = wave
+            forceDeliver()
+        }
+        else{
+            initDone = true
+        }
+    else
+        waveMax = wave
+        nbRecoverRcvd = 0      
+//APPEL TO-Broadcast(RECOVER,
+  }
+  return BB_STATE_VIEW_CHANGE; 
 }
 
 BbState bbSaveSet(BbState state, BbMsg* pMsg){
-  // TODO : To be completed
+    //if state ?
+    if (pMsg->(body.set.view) == view || !initDone){
+        //waitingSets = waitingSets + set
+    }
   return BB_STATE_ALONE; // TODO : Put the correct return value
 }
-
-

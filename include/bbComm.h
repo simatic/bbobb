@@ -16,6 +16,7 @@
 
 #include "bbStateMachine.h"
 #include "bbMsg.h"
+#include "bbSharedMsg.h"
 #include "comm.h"
 
 #include <sys/uio.h>

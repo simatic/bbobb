@@ -20,14 +20,16 @@
 #include "advanced_struct.h"
 #include "counter.h"
 #include "iomsg.h"
+#include "bbSingleton.h"
 
 void * waitCommForAccept(void * data){
-    trComm * aComm;
     int error;
+
     BbSingleton * singleton = data;
-    printf("ConnectionMgt : OK\n");
+    printf("ConnectionWait : OK\n");
+    
     do{
-        aComm = commAccept(singleton->comm);
+        receive(singleton->commForAccept)
         pthread_t connectionMgtThread;
         error = pthread_create(&connectionMgtThread, NULL, bbConnectionMgt, data);
         pthread_detach(connectionMgtThread);
@@ -38,10 +40,12 @@ void * bbConnectionMgt(void * data){
     
     womim * aMsg; /* TO DO : Changer en SharedMsg */
     BbSingleton * singleton = data;
+    trComm * rcvdComm = commAlloc()
     printf("ConnectionMgt : OK\n");
+    
     do{
-        aMsg = receive(singleton->comm);
-        bqueueEnqueue(singleton->queue, &aMsg);
+        aMsg = receive(singleton->commForAccept);
+        bqueueEnqueue(singleton->msgQueue, &aMsg);
     }while(1); 
 }
 

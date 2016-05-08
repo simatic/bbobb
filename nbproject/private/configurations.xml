@@ -7,6 +7,7 @@
         <in>bbError.h</in>
         <in>bbInterface.h</in>
         <in>bbMsg.h</in>
+        <in>bbSharedMsg.h</in>
         <in>bbSingleton.h</in>
         <in>bbStateMachine.h</in>
         <in>bbobb.h</in>
@@ -18,6 +19,7 @@
         <in>bbError.c</in>
         <in>bbInterface.c</in>
         <in>bbMsg.c</in>
+        <in>bbSharedMsg.c</in>
         <in>bbSingleton.c</in>
         <in>bbStateMachine.c</in>
       </df>
@@ -129,6 +131,8 @@
           </df>
         </df>
       </df>
+      <in>bbMsg.c</in>
+      <in>bbStateMachine.c</in>
     </df>
   </logicalFolder>
   <projectmakefile>makefile</projectmakefile>

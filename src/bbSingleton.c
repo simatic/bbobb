@@ -16,12 +16,20 @@
 #include <pthread.h>
 #include "bbSingleton.h"
 
-BbSingleton * bbSingletonInit() {
-    BbSingleton * singleton = NULL;
-    singleton = malloc(sizeof(BbSingleton));
+BbSingleton * bbSingleton;
+
+int bbSingletonInit() {
     
-    singleton->bbInitDone = false;
-    if(singleton->error = pthread_mutex_unlock(&(singleton->bbStateMachineMutex)) != 0){
-        perror("error with stateMachineMutex's init");
+    bbSingleton = malloc(sizeof(BbSingleton));
+    if(bbSingleton == NULL) {
+        return 1;
     }
+    
+    bbSingleton->initDone = false;
+    
+    char port[] = "8000";
+    bbSingleton->commForAccept = commNewForAccept(port);
+    bbSingleton->msgQueue = newBqueue();
+    
+    return 0;
 }

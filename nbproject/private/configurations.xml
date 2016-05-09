@@ -10,6 +10,7 @@
         <in>bbSharedMsg.h</in>
         <in>bbSingleton.h</in>
         <in>bbStateMachine.h</in>
+        <in>bbiomsg.h</in>
         <in>bbobb.h</in>
       </df>
       <df name="lib">
@@ -22,6 +23,7 @@
         <in>bbSharedMsg.c</in>
         <in>bbSingleton.c</in>
         <in>bbStateMachine.c</in>
+        <in>bbiomsg.c</in>
       </df>
       <df name="Test">
         <df name="TestInit">

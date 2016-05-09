@@ -17,10 +17,12 @@
 #include <assert.h>
 
 #include "bbComm.h"
+#include "comm.h"
 #include "advanced_struct.h"
 #include "counter.h"
 #include "iomsg.h"
 #include "bbSingleton.h"
+#include "bbSharedMsg.h"
 
 void * waitCommForAccept(void * data){
     int error;
@@ -29,7 +31,7 @@ void * waitCommForAccept(void * data){
     printf("ConnectionWait : OK\n");
     
     do{
-        receive(singleton->commForAccept)
+        receive(singleton->commForAccept);
         pthread_t connectionMgtThread;
         error = pthread_create(&connectionMgtThread, NULL, bbConnectionMgt, data);
         pthread_detach(connectionMgtThread);
@@ -38,9 +40,9 @@ void * waitCommForAccept(void * data){
 
 void * bbConnectionMgt(void * data){
     
-    womim * aMsg; /* TO DO : Changer en SharedMsg */
+    BbSharedMsg * aMsg = newBbSharedMsg(sizeof(BbMsg));
     BbSingleton * singleton = data;
-    trComm * rcvdComm = commAlloc()
+    trComm * rcvdComm = commAlloc();
     printf("ConnectionMgt : OK\n");
     
     do{

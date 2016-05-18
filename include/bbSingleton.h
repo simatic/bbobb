@@ -39,6 +39,7 @@ typedef struct {
     unsigned char currentWave; /*!<current wave for automaton>*/
     unsigned char currentStep; /*!<current step in current wave>*/
     unsigned char viewSize; /*!<number of paticipants, max 256>*/
+    unsigned int viewId; /*current view ID number*/
     circuitView view; /*!<current view of participants>*/
     pthread_mutex_t viewChangeMutex; /*!<mutex used when view changes>*/
     trComm * commForAccept; /*!<trComm used to accept connections>*/

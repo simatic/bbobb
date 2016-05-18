@@ -22,7 +22,6 @@ BbStateMachineFunc bbTransitions[BB_LAST_STATE+1][BB_LAST_MSG+1] = {
 
 int bbAutomatonInit(){
     int error = 0;
-    void * data = NULL;
     
     if(bbSingletonInit()) {
     bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
@@ -30,10 +29,9 @@ int bbAutomatonInit(){
 			       __LINE__,
 			       "bbAutomatonStateInit error with singletonInit");
     }
-    data = bbSingleton;
     
     pthread_t msgTreatementThread;
-    error = pthread_create(&msgTreatementThread, NULL, bbMsgTreatement, data);
+    error = pthread_create(&msgTreatementThread, NULL, bbMsgTreatement, NULL);
     if(error){
     bbErrorAtLine(  EXIT_FAILURE,
                     error,
@@ -43,7 +41,7 @@ int bbAutomatonInit(){
     }
     
     pthread_t waitCommForAcceptThread;
-    error = pthread_create(&waitCommForAcceptThread, NULL, waitCommForAccept, data);
+    error = pthread_create(&waitCommForAcceptThread, NULL, waitCommForAccept, NULL);
     if(error){
     bbErrorAtLine(  EXIT_FAILURE,
                     error,
@@ -53,13 +51,13 @@ int bbAutomatonInit(){
     };
     
     
-    printf("AutomatonInit : OK"\n);
+    printf("AutomatonInit : OK\n");
         
     return 0;
 }
 
-void * bbMsgTreatement(void * data){ //TO DO rajouter mutex
-    bbSingleton = data;
+void * bbMsgTreatement(void){ //TO DO rajouter mutex
+
     BbMsg * msg = malloc(sizeof(BbMsg));
     do {
         msg = bqueueDequeue(bbSingleton->msgQueue);

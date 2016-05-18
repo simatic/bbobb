@@ -50,6 +50,6 @@ int bbAutomatonInit();
 /*
  * @brief thread to treat msg in queue with fifo order
  */
-void * bbMsgTreatement(void * data);
+void * bbMsgTreatement(void);
 
 #endif /* _BB_STATE_MACHINE_H */

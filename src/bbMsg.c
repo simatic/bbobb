@@ -4,9 +4,12 @@
 * @author May CATTANT - Quentin MONNOT - Victor ROUQUETTE - Michel SIMATIC
 * @date 23 february 2016
 */
-/*
+
+#include <stdio.h>
+#include <stdlib.h>
 #include "bbMsg.h"
 
+/*
 BbBatch initBatch () {
     BbBatch batch;
     

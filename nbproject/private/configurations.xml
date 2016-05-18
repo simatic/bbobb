@@ -34,10 +34,7 @@
         </df>
         <df name="testUnitaireTempo">
           <in>Makefile</in>
-          <in>bbComm-test.c</in>
-          <in>bbInterface-test.c</in>
-          <in>bbStateMachine-test.c</in>
-          <in>testConnection.c</in>
+          <in>main.c</in>
         </df>
       </df>
       <df name="TrainsProtocol">

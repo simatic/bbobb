@@ -31,5 +31,8 @@ int bbSingletonInit() {
     bbSingleton->commForAccept = commNewForAccept(port);
     bbSingleton->msgQueue = newBqueue();
     
+    bbSingleton->currentWave = 0;
+    bbSingleton->currentStep = 0;
+    
     return 0;
 }

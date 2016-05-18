@@ -38,6 +38,7 @@
 #include "advanced_struct.h"
 #include "connect.h"
 #include "bbSingleton.h"
+#include "bbSharedMsg.h"
 
 /**
  * @brief Fun used to listen on a trComm

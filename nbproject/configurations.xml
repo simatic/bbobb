@@ -5,6 +5,7 @@
       <df name="include">
         <in>bbComm.h</in>
         <in>bbInterface.h</in>
+        <in>bbSharedMsg.h</in>
         <in>bbSingleton.h</in>
         <in>bbiomsg.h</in>
       </df>
@@ -12,6 +13,8 @@
         <in>bbComm.c</in>
         <in>bbError.c</in>
         <in>bbInterface.c</in>
+        <in>bbMsg.c</in>
+        <in>bbSharedMsg.c</in>
         <in>bbSingleton.c</in>
         <in>bbStateMachine.c</in>
         <in>bbiomsg.c</in>
@@ -22,10 +25,7 @@
         </df>
         <df name="testUnitaireTempo">
           <in>Makefile</in>
-          <in>bbComm-test.c</in>
-          <in>bbInterface-test.c</in>
-          <in>bbStateMachine-test.c</in>
-          <in>testConnection.c</in>
+          <in>main.c</in>
         </df>
       </df>
       <df name="TrainsProtocol">
@@ -126,25 +126,7 @@
       </item>
       <item path="Test/testUnitaireTempo/Makefile" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="Test/testUnitaireTempo/bbComm-test.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="Test/testUnitaireTempo/bbInterface-test.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="Test/testUnitaireTempo/bbStateMachine-test.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="Test/testUnitaireTempo/testConnection.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
+      <item path="Test/testUnitaireTempo/main.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="TrainsProtocol/src/address.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -279,6 +261,8 @@
       </item>
       <item path="include/bbInterface.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="include/bbSharedMsg.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="include/bbSingleton.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/bbiomsg.h" ex="false" tool="3" flavor2="0">
@@ -288,6 +272,10 @@
       <item path="src/bbError.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="src/bbInterface.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/bbMsg.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/bbSharedMsg.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="src/bbSingleton.c" ex="false" tool="0" flavor2="0">
       </item>

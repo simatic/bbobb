@@ -24,30 +24,28 @@
 #include "bbSingleton.h"
 #include "bbSharedMsg.h"
 
-void * waitCommForAccept(void * data){
-    int error;
+void * waitCommForAccept(void){
 
-    BbSingleton * singleton = data;
     printf("ConnectionWait : OK\n");
     
     do{
-        receive(singleton->commForAccept);
+        receive(bbSingleton->commForAccept);
         pthread_t connectionMgtThread;
-        error = pthread_create(&connectionMgtThread, NULL, bbConnectionMgt, data);
+        pthread_create(&connectionMgtThread, NULL, bbConnectionMgt, NULL);
         pthread_detach(connectionMgtThread);
     }while(1);
 }
 
-void * bbConnectionMgt(void * data){
+void * bbConnectionMgt(void){
     
-    BbSharedMsg * aMsg = newBbSharedMsg(sizeof(BbMsg));
-    BbSingleton * singleton = data;
-    trComm * rcvdComm = commAlloc();
+    BbSharedMsg * aMsg /*= newBbSharedMsg(sizeof(BbMsg))*/;
+
+    //trComm * rcvdComm = commAlloc(fd);
     printf("ConnectionMgt : OK\n");
     
     do{
-        aMsg = receive(singleton->commForAccept);
-        bqueueEnqueue(singleton->msgQueue, &aMsg);
+        //aMsg = receive(singleton->commForAccept);
+        bqueueEnqueue(bbSingleton->msgQueue, &aMsg);
     }while(1); 
 }
 

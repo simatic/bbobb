@@ -11,6 +11,7 @@
 
 #include <pthread.h>
 #include "bbMsg.h"
+#include "address.h"
 
 /*
  * @brief Structure used to control how many pointers point on a BbMsg
@@ -80,5 +81,15 @@ BbBatchInSharedMsg* copyBatchInSharedMsg(BbBatchInSharedMsg *batchInSharedMsg);
  * @param[in] batchInSharedMsg BbBatchInSharedMsg to free
  */
 void deleteBatchInSharedMsg(BbBatchInSharedMsg *batchInSharedMsg);
+
+/**
+ * @brief Get if exist a BbBatchInSharedMsg which points to a @a batch of @a sender located
+          inside @a sharedMsg
+ * @param[in] sharedMsg the @a BbSharedMsg containing this @a BbBatch
+ * @param[in] last @a BbBatchInSharedMsg return by the function or NULL if it doesn't exist
+ * @param[in] rank of @a BbSet where the searched @a BbBatch is
+ * @return A pointer on the @a BbBatchInSharedMsg or NULL
+ */
+BbBatchInSharedMsg* getBatchInSharedMsg(BbSharedMsg *sharedMsg, BbBatchInSharedMsg * lastReturnedBatch, int rankSet);
 
 #endif /* _BB_SHARED_MSG_H */

@@ -48,7 +48,7 @@ BbSharedMsg * bbReceive(trComm * aComm){
       pthread_mutex_init(&(msgExt->pfx.mutex), NULL );
       msgExt->pfx.counter = 1;
       msgExt->msg.len = length;
-      return (msgExt);
+      return NULL; //TO DO : put correct value
     } else {
       free(msgExt);
     }
@@ -78,7 +78,7 @@ BbSharedMsg * bbReceive(trComm * aComm){
   msgExt->msg = newMsg(disconnectType, rankToAddr(j));
   //close the connection
   closeConnection(rankToAddr(j), isPred);
-  return (msgExt);
+  return NULL; //put correct value
 }
 
 //Use to send all the messages Msg, even the TRAIN ones, but in fact, TRAIN messages will never be created for the sending, but use only on reception... Thus, to send TRAIN messages, sendTrain will be used.

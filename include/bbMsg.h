@@ -42,6 +42,11 @@ typedef struct {
   BbBatch batches[];
 } __attribute__((packed)) BbSet;
 
+typedef struct {
+    unsigned int len;
+    BbSet set;
+}__attribute__((packed)) BbSetInRecover;
+
 /**
 * @brief Data structure for BB_RECOVER messages
 */
@@ -50,7 +55,7 @@ typedef struct {
   circuitView   view;     /**< View at the moment the message was sent */
   bool          initDone; /**< Value of initDone at the moment the message was sent */
   unsigned char nbSets;   /**< Number of sets which are sent in this message */
-  BbSet         sets[];   /**< Sets not yet delivered by the sender */
+  BbSetInRecover sets[];   /**< Sets not yet delivered by the sender */
 } __attribute__((packed)) BbRecover;
 
 /**

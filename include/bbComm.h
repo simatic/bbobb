@@ -25,9 +25,9 @@
 extern "C" {
 #endif
 
-void * waitCommForAccept(void * data);
+void * waitCommForAccept(void);
 
-void * bbConnectionMgt(void * data);
+void * bbConnectionMgt(void);
 
 BbSharedMsg * bbReceive(trComm * aComm);
 

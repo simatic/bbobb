@@ -10,21 +10,27 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbMsg.c</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbStateMachine.h</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbComm.c</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbInterface.h</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/makefile</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/src/comm.c</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbSharedMsg.h</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/Test/TestInit/Makefile</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/src/comm.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbiomsg.c</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbError.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/include/address.h</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbSingleton.c</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbMsg.h</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbSingleton.h</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbInterface.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/include/comm.h</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/Test/TestInit/test.c</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbStateMachine.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbiomsg.h</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbError.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbSharedMsg.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/include/common.h</file>
         </group>
     </open-files>
 </project-private>

@@ -10,9 +10,9 @@
 
 void callbackCircuitChange(circuitView *pcv){
     bbSingleton.view = *pcv;
-    connectToOtherViewMembers(pcv);
+    connectToViewMembers(pcv);
 }
 
-void CallBackODeliver(address sender, BB_MType messageType, message * mp) {
+void CallBackODeliver(address sender, t_typ messageType, message * mp) {
     
 }

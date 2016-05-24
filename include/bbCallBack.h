@@ -13,17 +13,17 @@
 
 #ifndef BBCALLBACK_H
 #define BBCALLBACK_H
+#include "trains.h"
 
 /** 
- * @brief Callback function called by bbobb middleware when there is a change in circuit members
+ * @brief Callback function called by Trains middleware when there is a change in circuit members
  */
-extern CallbackCircuitChange theBbCallbackCircuitChange;
+void callbackCircuitChange(circuitView *pcv);
 
 /** 
- * @brief Callback function called by bbobb middleware when it is ready to o-deliver a message 
- * to the application layer
+ * @brief Callback function called by Trains middleware when it wants to o-deliver a message to BBOBB
  */
-extern CallbackODeliver theBbCallbackODeliver;
+void CallBackODeliver(address sender, t_typ messageType, message * mp);
 
 
 

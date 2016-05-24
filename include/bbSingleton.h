@@ -21,6 +21,7 @@
 #include "bbMsg.h"
 #include "bbStateMachine.h"
 #include "applicationMessage.h"
+#include "bbSharedMsg.h"
 
 /*typedef enum{
     TRUE,
@@ -46,8 +47,11 @@ typedef struct {
     trComm * commForAccept; /*!<trComm used to accept connections>*/
     trComm* commToViewMembers[MAX_MEMB]; /*!< trComm used to communicate with other view members */
     trBqueue * msgQueue; /*!<trBqueue used to store bbMsg before treatement */
-    BbBatch * batchToSend; /*!<next batch to send with bbobb */
-    pthread_mutex_t batchToSendMutex; /*!<mutex used to modifie batchToSend */
+    BbBatchInSharedMsg * batchToSend; /*!<next batch to send with bbobb */
+    pthread_mutex_t batchToSendMutex; /*!< mutex used to synchronize batchToSend modifications */
+    pthread_cond_t  batchToSendCond;  /*!< condition used to synchronize batchToSend modifications */
+    int batchMaxLen; /*!< Ideal maximum length for sent batches */
+    trBqueue * batchesToDeliver; /*!< Bqueue used to communicate batches which can be delivered to the application layer */
     CallbackCircuitChange callbackCircuitChange; /*!< Callback function called by bbobb middleware when there is a change in circuit members */
     CallbackODeliver callbackODeliver; /*!< Callback function called by bbobb middleware when it is ready to o-deliver a message to the application layer */
 } BbSingleton;

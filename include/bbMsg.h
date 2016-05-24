@@ -81,4 +81,26 @@ typedef struct {
   }body;/**<A union between all the types of possible messages */
 }__attribute__((packed)) BbMsg;
 
+/**
+ * @brief Search the first message contained in a batch @a b
+ * @param[in] b A pointer on the batch in which to search the first message
+ * @return A pointer on a first message or NULL if @a b contains no messages
+ */
+message *firstMsgInBatch(BbBatch *b);
+
+/**
+ * @brief Give the message following message @a mp in batch @a b
+ * @param[in] b A pointer on a batch in which to search next message
+ * @param[in] mp A pointer on a message after which to search for an other message
+ * @return A pointer on a next message or NULL if @a b contains no other messages
+ */
+message *nextMsgInBatch(BbBatch *w, message *mp);
+
+/**
+ * @brief Allocate a message in @a bbSingleton.batchToSend
+ * @param[in] payloadSize the required size to allocate
+ * @return A pointer on a message
+ */
+message * allocInBatchToSend(int payloadSize);
+
 #endif /* _BB_MSG_H */

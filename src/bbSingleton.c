@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <stddef.h>
 #include "bbSingleton.h"
 #include "bbComm.h"
 
@@ -21,6 +22,8 @@ BbSingleton bbSingleton;
 
 int bbSingletonInit() {
     int i;
+    int rc;
+    BbSharedMsg *set = newBbSharedMsg(offsetof(BbSharedMsg,msg.body.set.batches)+bbSingleton.batchMaxLen);
     
     bbSingleton.initDone = false;
     
@@ -34,7 +37,18 @@ int bbSingletonInit() {
     bbSingleton.currentWave = 0;
     bbSingleton.currentStep = 0;
     
-    bbSingleton.batchToSend->sender = bbSingleton.myAddress;
+    bbSingleton.batchToSend = newBatchInSharedMsg(set->msg.body.set.batches, set);
+    deleteBbSharedMsg(set);
+    set = NULL;
+    bbSingleton.batchToSend->batch->sender = bbSingleton.myAddress;
+    bbSingleton.batchToSend->batch->len = sizeof(BbBatch);
+
+    pthread_mutex_init(&(bbSingleton.batchToSendMutex), NULL );
+
+    rc= pthread_cond_init(&(bbSingleton.batchToSendCond), NULL);
+    assert(rc == 0);
+
+    bbSingleton.batchesToDeliver = newBqueue();
     
     return 0;
 }

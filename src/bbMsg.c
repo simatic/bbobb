@@ -100,3 +100,23 @@ void buildNewSet() {
         }
     }
 }
+
+message *firstMsgInBatch(BbBatch *b){
+  if (b->len == sizeof(BbBatch))
+    return NULL;
+  else
+    return b->messages;
+}
+
+message *nextMsgInBatch(BbBatch *b, message *mp){
+  message *mp2 = (message*)((char*)mp + mp->header.len);
+  if ((char*)mp2 - (char*)b >= b->len)
+    return NULL;
+  else
+    return mp2;
+}
+
+message * allocInBatchToSend(int payloadSize){
+    // TODO To be completed
+    return NULL;
+}

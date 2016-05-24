@@ -7,7 +7,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/uio.h>
 #include "bbMsg.h"
+#include "bbSingleton.h"
+
+static BbBatch* rcvdBatch[][];//[sizeview][maxwave] tempos
 
 /*
 BbBatch initBatch () {
@@ -28,60 +32,71 @@ BbBatch newBbBatch (address sender, message messages[]) {
     
     return batch;
 }
-
-BbMsg initBbMsg(){
-    BbMsg msg;
-    msg.len=sizeof(BbMsg);
-    msg.type; //A DEF
-    msg.body=NULL; //A DEF
-  return msg;
-}
-
-BbMsg newBbMsg (BB_MType mtype, address sender, circuitView view, bool initDone, unsigned char wave, unsigned char step){
-    BbMsg msg = initBbMsg();
-
-    switch(mtype){
-        case BB_MSG_RECOVER :
-            msg.len=sizeof(unsigned int)+sizeof(BB_MType)+sizeof(BbRecover);//sizeof(address)+sizeof(circuitView)+sizeof(bool)+sizeof(int)+sizeof(BbSet);
-            msg.type=mtype;
-            msg.body.sender=sender;
-            msg.body.view=view;
-            msg.body.initDone=initDone;
-            msg.body.nbSets=0;
-            msg.body.sets[]=NULL;
-            break;
-        case BB_MSG_VIEW_CHANGE  :
-            msg.len=sizeof(unsigned int)+sizeof(BB_MType)+sizeof(BbViewChange);
-            msg.type=mtype;
-            msg.body.view=view;
-            break;
-        case BB_MSG_SET :
-            msg.len=sizeof(unsigned int)+sizeof(BB_MType)+sizeof(BbSet);
-            msg.type=mtype;
-            msg.body.wave=wave;
-            msg.body.step=step;
-            break;
-  return(msg);
-}
-
-BbSharedMsg initBbSharedMsg () {
-    BbSharedMsg smsg;
-    
-    smsg.prefix;
-    smsg.msg=initBbMsg();
-    
-    return smsg;
-}
-
-
-BbSharedMsg newBbSharedMsg (BB_MType mtype, address sender, circuitView view, bool initDone, unsigned char wave, unsigned char step, ControlSharing prefix){
-    BbSharedMsg smsg=initSharedMsg();
-    
-    smsg.prefix=prefix;
-    smsg.msg=newBbMsg(BB_MType mtype, address sender, circuitView view, bool initDone, unsigned char wave, unsigned char step);
-
-
-  return(msg);
-
-}
 */
+
+BbMsg * createSet(int waveNum) {
+    BbMsg * set = NULL;
+    
+    int lenOfSet;
+    int lenOfBatches;
+    int processIndex;
+    
+    for(processIndex=0; processIndex<MAX_MEMB; processIndex++) {
+        if(rcvdBatch[waveNum][processIndex]->len != NULL) {
+            lenOfBatches += rcvdBatch[waveNum][processIndex]->len;
+        }
+    }
+    
+    lenOfSet = offsetof(BbMsg, body.set.batches) + lenOfBatches;
+    set = malloc(lenOfSet);
+    
+    //We fill the fields of set
+    set->len = lenOfSet;
+    set->type = BB_MSG_SET;
+    set->body.set.viewId = bbSingleton.viewId;
+    set->body.set.wave = waveNum;
+    set->body.set.step = 0; //unused in case of RECOVER messages
+    
+    //We fill the batches of the set
+    lenOfBatches = 0;
+    for(processIndex=0; processIndex<MAX_MEMB; processIndex++) {
+        if(rcvdBatch[waveNum][processIndex] != NULL) {
+            memcpy((char*)&(set->body.set.batches)+lenOfBatches, rcvdBatch[waveNum][processIndex], rcvdBatch[waveNum][processIndex]->len);
+            lenOfBatches += rcvdBatch[waveNum][processIndex]->len;
+        }
+    }
+    
+    return set;
+}
+
+void buildNewSet() {
+    BbMsg newSet;
+    struct iovec iov[MAX_MEMB];
+    int iovcnt = 0;
+    int senderBatchToAdd = 0;
+    int i;
+    int nbSetToAdd = (2^bbSingleton.currentStep < bbSingleton.view->cv_nmemb - 2^bbSingleton.currentStep ?
+                        2^bbSingleton.currentStep :
+                        bbSingleton.view->cv_nmemb - 2^bbSingleton.currentStep);
+    
+    newSet.type = BB_MSG_SET;
+    newSet.body.set.viewId = bbSingleton.viewId;
+    newSet.body.set.wave = bbSingleton.currentWave;
+    newSet.body.set.step = bbSingleton.currentStep;
+    
+    iov[iovcnt].iov_base = &newSet;
+    iov[iovcnt].iov_len = offsetof(BbMsg, body.set.batches);
+    newSet.len = iov[iovcnt].iov_len;
+    iovcnt++;
+    
+    for(i=0, senderBatchToAdd; i < nbSetToAdd ; i++, senderBatchToAdd = predInView(senderBatchToAdd, bbSingleton.view)) { //TO DO : pred in view
+    //TO DO :ask for addreToIndex
+        if(rcvdBatch[bbSingleton.currentWave][senderBatchToAdd] != NULL) {
+            int rank = addrToIndex(senderBatchToAdd);
+            iov[iovcnt].iov_base = rcvdBatch[bbSingleton.currentWave][senderBatchToAdd]; //Possible à faire, position dans rcvdBatch
+            iov[iovcnt].iov_len = rcvdBatch[bbSingleton.currentWave][senderBatchToAdd]->len;
+            newSet.len += iov[iovcnt].iov_len;
+            iovcnt++;
+        }
+    }
+}

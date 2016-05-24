@@ -11,7 +11,7 @@
 // fonctions à faire: sizeview, newview
 //A ajouter = remplir waiting set, queue, etc
 static int nbRecoverRcvd; 
-static BbBatch* rcvdBatch[][];//[sizeview][maxwave]
+static BbBatch* rcvdBatch[][16];//[sizeview][maxwave] TO DO : refactor to BbBatchInSharedMsg
 static BbSet* waitingSets[];//size?
 static unsigned char waveMax;
 BbState bbAutomatonState;
@@ -40,12 +40,7 @@ BbStateMachineFunc bbTransitions[BB_LAST_STATE+1][BB_LAST_MSG+1] = {
 int bbAutomatonInit(){
     int error = 0;
     
-    if(bbSingletonInit()) {
-    bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
-			       __FILE__,
-			       __LINE__,
-			       "bbAutomatonStateInit error with singletonInit");
-    }
+    rcvdBatch = NULL;
     
     pthread_t msgTreatementThread;
     error = pthread_create(&msgTreatementThread, NULL, bbMsgTreatement, NULL);
@@ -53,7 +48,7 @@ int bbAutomatonInit(){
     bbErrorAtLine(  EXIT_FAILURE,
                     error,
                     __FILE__,
-                     __LINE__,
+                    __LINE__,
                     "bbAutomatonStateInit error with msgTreatementThreadInit");
     }
     
@@ -77,7 +72,7 @@ void * bbMsgTreatement(void){ //TO DO rajouter mutex
 
     BbMsg * msg = malloc(sizeof(BbMsg));
     do {
-        msg = bqueueDequeue(bbSingleton->msgQueue);
+        msg = bqueueDequeue(bbSingleton.msgQueue);
         //bbStateMachineTransition(msg);
         if(msg!=NULL){
             printf("message reçus !");
@@ -127,16 +122,16 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pMsg){//A CHANGER?
    // set = (BbSet*)offset;
 
     BbBatch pBatch=NULL;
-    if (pMsg->msg.body.recover.view == bbSingleton->view) {
+    if (pMsg->msg.body.recover.view == bbSingleton.view) {
         nbRecoverRcvd++;
         if(pMsg->msg.body.recover.initDone){
-            if(!(bbSingleton->initDone)){
+            if(!(bbSingleton.initDone)){
             //viewIdInLastSignificantRecover = senderViewId
             //viewinlastblabla -> on affecte directement au singleton dans le cas ou pas initdone
-                pMsg->msg.body.recover.viewId = bbSingleton->viewId;
+                pMsg->msg.body.recover.viewId = bbSingleton.viewId;
             }
             //nop(recoverRcvd[nbRecoverRcvd])->(body.recover.viewId)=pMsg->(body.recover.viewId);
-            if(pMsg->msg.body.recover.sets[0].wave >= bbSingleton->currentWave){//a voir comment acceder au set
+            if(pMsg->msg.body.recover.sets[0].wave >= bbSingleton.currentWave){//a voir comment acceder au set
                 //foreach batch in set1.batches do
                 do{
                     pBatch=getBatchInSharedMsg(pMsg, pBatch, 0);//delete?
@@ -158,7 +153,7 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pMsg){//A CHANGER?
                // }
 
             }
-            if(pMsg->msg.body.recover.sets[1].wave > bbSingleton->currentWave){//a voir comment acceder au set
+            if(pMsg->msg.body.recover.sets[1].wave > bbSingleton.currentWave){//a voir comment acceder au set
                 
                 waveMax = pMsg->msg.body.recover.sets[1].wave;
 
@@ -174,10 +169,10 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pMsg){//A CHANGER?
             deleteBatchInSharedMsg({pBatch,pMsg});
         }    
         else{
-            bbSingleton->currentWave=pMsg->msg.body.recover.sets[1].wave;
+            bbSingleton.currentWave=pMsg->msg.body.recover.sets[1].wave;
             waveMax=pMsg->msg.body.recover.sets[1].wave;
         }
-            if (nbRecoverRcvd == bbSingleton->viewSize){
+            if (nbRecoverRcvd == bbSingleton.viewSize){
             //forceDeliver()
             //sendBatchForStep0()
             // traiter les waiting set
@@ -202,26 +197,26 @@ BbState bbProcessSet(BbState state, BbSharedMsg* pMsg){
 BbState bbProcessViewChange(BbState state, BbSharedMsg* pMsg){
   
     nbRecoverRcvd=0;
-    rcvdBatch=malloc((bbSingleton->viewSize)*waveMax*sizeof(BbBatch)); 
+    rcvdBatch=malloc((bbSingleton.viewSize)*waveMax*sizeof(BbBatch)); 
     waitingSets = [];
-    bbSingleton->view = newView();// TODO a definir le calcul de la nouvelle vue
-    if (bbSingleton->initDone){
-        bbSingleton->viewId += 1;
+    bbSingleton.view = newView();// TODO a definir le calcul de la nouvelle vue
+    if (bbSingleton.initDone){
+        bbSingleton.viewId += 1;
     }
     else{
-        bbSingleton->viewId = 0;
+        bbSingleton.viewId = 0;
     }
-    if (bbSingleton->viewSize == 1){ 
-        if (bbSingleton->initDone) {
-            waveMax = bbSingleton->currentWave;
+    if (bbSingleton.viewSize == 1){ 
+        if (bbSingleton.initDone) {
+            waveMax = bbSingleton.currentWave;
             //forceDeliver();
         }
         else{
-            bbSingleton->initDone = true ;
+            bbSingleton.initDone = true ;
         }
     } 
     else{
-        waveMax = bbSingleton->currentWave;
+        waveMax = bbSingleton.currentWave;
         nbRecoverRcvd = 0;     
 //APPEL TO-Broadcast(RECOVER,
     
@@ -231,7 +226,7 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pMsg){
 
 BbState bbSaveSet(BbState state, BbSharedMsg* pMsg){//PB VUE
     //if state ?
-    if (pMsg->msg.view == bbSingleton->view || !(bbSingleton->initDone)){
+    if (pMsg->msg.view == bbSingleton.view || !(bbSingleton.initDone)){
         //waitingSets = waitingSets + set
     }
   return BB_STATE_ALONE; // TODO : Put the correct return value

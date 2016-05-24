@@ -44,9 +44,11 @@ typedef struct {
     pthread_mutex_t viewChangeMutex; /*!<mutex used when view changes>*/
     trComm * commForAccept; /*!<trComm used to accept connections>*/
     trBqueue * msgQueue; /*!<trBqueue used to store bbMsg before treatement>*/
+    BbBatch * batchToSend; /*!<next batch to send with bbobb*/
+    pthread_mutex_t batchToSendMutex; /*!<mutex used to modifie batchToSend>*/
 } BbSingleton;
 
-extern BbSingleton * bbSingleton;
+extern BbSingleton bbSingleton;
 
 /*
  * @brief initialisation of @a Singleton

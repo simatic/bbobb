@@ -16,23 +16,20 @@
 #include <pthread.h>
 #include "bbSingleton.h"
 
-BbSingleton * bbSingleton;
+BbSingleton bbSingleton;
 
 int bbSingletonInit() {
     
-    bbSingleton = malloc(sizeof(BbSingleton));
-    if(bbSingleton == NULL) {
-        return 1;
-    }
+    bbSingleton.initDone = false;
     
-    bbSingleton->initDone = false;
+    char * port = "8000";
+    bbSingleton.commForAccept = commNewForAccept(port);
+    bbSingleton.msgQueue = newBqueue();
     
-    char port[] = "8000";
-    bbSingleton->commForAccept = commNewForAccept(port);
-    bbSingleton->msgQueue = newBqueue();
+    bbSingleton.currentWave = 0;
+    bbSingleton.currentStep = 0;
     
-    bbSingleton->currentWave = 0;
-    bbSingleton->currentStep = 0;
+    bbSingleton.batchToSend->sender = bbSingleton.myAddress;
     
     return 0;
 }

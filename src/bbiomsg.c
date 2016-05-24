@@ -32,160 +32,56 @@
 #include "../include/bbiomsg.h"
 
 BbSharedMsg * bbReceive(trComm * aComm){
-  womim * msgExt;
+  BbSharedMsg * msgExt = NULL;
   int nbRead, nbRead2;
-  int length;
+  int len;
   int j;
   bool isPred;
 
-  nbRead = commReadFully(aComm, &length, sizeof(length));
-  if (nbRead == sizeof(length)) {
-    msgExt = calloc(length + sizeof(prefix), sizeof(char));
-    assert(msgExt != NULL);
-    nbRead2 = commReadFully(aComm, ((char*) msgExt) + sizeof(prefix) + nbRead,
-        (length - nbRead));
-    if (nbRead2 == length - nbRead) {
-      pthread_mutex_init(&(msgExt->pfx.mutex), NULL );
-      msgExt->pfx.counter = 1;
-      msgExt->msg.len = length;
-      return NULL; //TO DO : put correct value
+  nbRead = commReadFully(aComm, &len, sizeof(len));
+  if (nbRead == sizeof(len)) {
+    msgExt = newBbSharedMsg(len);
+    msgExt->msg.len = len;
+    nbRead2 = commReadFully(aComm,(char*)&(msgExt->msg.type), (len - nbRead));
+    if (nbRead2 == len - nbRead) {
+      return msgExt;
     } else {
-      free(msgExt);
-    }
-  }
-
-  //Connection has been closed
-  //search the address which has vanished
-  searchTComm(aComm, globalAddrArray, &j, &isPred);
-  if (j == -1) {
-    // It may happen when automaton has closed all the connections (thus
-    // has erased aComm from globalAddrArray). As we are already aware of
-    // this connection loss, there is nothing to do.
-    return NULL ;
-  }
-  //create the DISCONNECT to return
-  MType disconnectType;
-  if (isPred) {
-    disconnectType = DISCONNECT_PRED;
-  } else {
-    disconnectType = DISCONNECT_SUCC;
-  }
-  msgExt = calloc(
-      sizeof(prefix) + sizeof(newMsg(disconnectType, rankToAddr(j))),
-      sizeof(char));
-  pthread_mutex_init(&(msgExt->pfx.mutex), NULL );
-  msgExt->pfx.counter = 1;
-  msgExt->msg = newMsg(disconnectType, rankToAddr(j));
-  //close the connection
-  closeConnection(rankToAddr(j), isPred);
-  return NULL; //put correct value
-}
-
-//Use to send all the messages Msg, even the TRAIN ones, but in fact, TRAIN messages will never be created for the sending, but use only on reception... Thus, to send TRAIN messages, sendTrain will be used.
-//use globalAddrArray defined in management_addr.h
-int bbSendOther(address addr, bool isPred, MType type, address sender){
-  int length;
-  int iovcnt = 1;
-  struct iovec iov[1];
-  int rank = -1;
-  trComm * aComm;
-  int result;
-  Msg * msg;
-
-  if (type == TRAIN) {
-    ERROR_AT_LINE_WITHOUT_ERRNUM(EXIT_FAILURE, __FILE__, __LINE__,
-        "Wrong MType given to sendOther");
-    return (-1);
-  } else {
-    msg = malloc(sizeof(newMsg(type, sender)));
-    *msg = newMsg(type, sender);
-
-    length = msg->len;
-    rank = addrToRank(addr);
-    if (rank != -1) {
-      aComm = getTComm(rank, isPred, globalAddrArray);
-      if (aComm == NULL ) {
-        free(msg);
-        return (-1);
-      }
-      //printf("Send message = %s on comm %p\n", msgTypeToStr(type), aComm);
-      iov[0].iov_base = msg;
-      iov[0].iov_len = length;
-      result = commWritev(aComm, iov, iovcnt);
-      if (result != length)
-        fprintf(stderr, "result!=length\n");
-      free(msg);
-      return (result);
-    } else {
-      //should return an error if the addr is out of rank
-      free(msg);
-      ERROR_AT_LINE_WITHOUT_ERRNUM(EXIT_FAILURE, __FILE__, __LINE__,
-          "Sending failure in sendOther (addr = %d)", addr);
-      return (-1);    //same error as commWritev !!
+      deleteBbSharedMsg(msgExt);
+      return NULL;
     }
   }
 }
 
-//send a train -> use sendOther to send the rest
-int bbSendSet(address addr, bool isPred, ltsStruct lts){
-  int iovcnt = 3;
-  struct iovec iov[iovcnt];
-  int rank = -1;
-  trComm * aComm;
-  int result;
-
-  rank = addrToRank(addr);
-  if (rank != -1) {
-    aComm = getTComm(rank, isPred, globalAddrArray);
-    if (aComm == NULL ) {
-      return (-1);
+void tOBroadcast_RECOVER() {
+    BbMsg * fset = NULL;
+    BbMsg * sset = NULL;
+    
+    if(bbSingleton.initDone) {
+        fset = createSet(bbSingleton.currentWave-1);
+        sset = createSet(bbSingleton.currentWave);;
     }
-    //printf("The train %d/%d is sent to %d on comm %p\n",lts.stamp.id,lts.stamp.lc,addr, aComm);
-
-    lts.lng = sizeof(lts.lng) + sizeof(lts.type) + sizeof(lts.stamp)
-        + sizeof(lts.circuit);
-    //to begin, let's enter the length of the message
-    iov[0].iov_base = &(lts);
-    iov[0].iov_len = lts.lng;
-    //after loading the wagons
-    //look after to be sure there are wagons to send...
-    if (lts.w.len != 0) {      //check if there are wagons
-      lts.lng += lts.w.len;
-      iov[1].iov_base = lts.w.w_w.p_wagon;
-      iov[1].iov_len = lts.w.len;
+    
+    int len = offsetof(BbMsg, body.recover.sets) + (bbSingleton.initDone ? fset->len + sset->len : 0);
+    message *mp = newmsg(len);
+    
+    BbMsg *msg = (BbMsg*)(mp->payload);
+    msg->len = len;
+    msg->type = BB_MSG_RECOVER;
+    msg->body.recover.sender = bbSingleton.myAddress;
+    msg->body.recover.view = *(bbSingleton.view);
+    msg->body.recover.initDone = bbSingleton.initDone;
+    msg->body.recover.viewId = bbSingleton.viewId;
+    if(bbSingleton.initDone) {
+        msg->body.recover.nbSets = 2;
+        memcpy(msg->body.recover.sets, fset->body.set, fset->len - offsetof(BbMsg, body.set));
+        memcpy((char*)msg->body.recover.sets + fset->len, sset->body.set, sset->len - offsetof(BbMsg, body.set));       
     } else {
-      iov[1].iov_base = NULL;
-      iov[1].iov_len = 0;
+        msg->body.recover.nbSets = 0;
     }
-    //finally loading the wagon which is waiting to be sent
-    //look after to be sure that p_wtosend exists or not...
-    if (lts.p_wtosend == NULL ) {      //check if p_wtosend is NULL
-      iov[2].iov_base = NULL;
-      iov[2].iov_len = 0;
-    } else {
-      if (firstMsg(lts.p_wtosend->p_wagon) == NULL ) { //check if p_wtosend is not just a header
-        printf("wagonToSend is just a header \n");
-        iov[2].iov_base = NULL;
-        iov[2].iov_len = 0;
-      } else {
-        lts.lng += lts.p_wtosend->p_wagon->header.len;
-        iov[2].iov_base = lts.p_wtosend->p_wagon;
-        iov[2].iov_len = lts.p_wtosend->p_wagon->header.len;
-      }
-    }
-    //sending the whole train with writev
-    //returning the number of bytes sent
-    result = commWritev(aComm, iov, iovcnt);
-    if (result != lts.lng)
-      fprintf(stderr,
-          "result!=lts.lng (bis) with result=%i and length=%i (errno = %i / %s)\n",
-          result, lts.lng, errno, strerror(errno));
-    return (result);
-  } else {
-    //should return an error if the addr is out of rank
-    ERROR_AT_LINE_WITHOUT_ERRNUM(EXIT_FAILURE, __FILE__, __LINE__,
-        "Sending failure in sendTrain (addr = %d)", addr);
-    return (-1);      //same error as commWritev !!
-  }
+    oBroadcast(FIRST_VALUE_AVAILABLE_FOR_MESS_TYP, mp);
+    
+    free(fset);
+    fset = NULL;
+    free(sset);
+    sset = NULL;
 }
-

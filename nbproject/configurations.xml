@@ -3,6 +3,7 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="." name="0">
       <df name="include">
+        <in>bbCallBack.h</in>
         <in>bbComm.h</in>
         <in>bbInterface.h</in>
         <in>bbSharedMsg.h</in>
@@ -10,6 +11,7 @@
         <in>bbiomsg.h</in>
       </df>
       <df name="src">
+        <in>bbCallBack.c</in>
         <in>bbComm.c</in>
         <in>bbError.c</in>
         <in>bbInterface.c</in>
@@ -257,6 +259,8 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="include/bbCallBack.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="include/bbComm.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/bbInterface.h" ex="false" tool="3" flavor2="0">
@@ -266,6 +270,8 @@
       <item path="include/bbSingleton.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="include/bbiomsg.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/bbCallBack.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="src/bbComm.c" ex="false" tool="0" flavor2="0">
       </item>

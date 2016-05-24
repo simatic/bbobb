@@ -29,7 +29,7 @@ typedef unsigned char BB_MType;
 */
 typedef struct {
   unsigned int len;     /**< Total lngth of structure */
-  address      sender;  /**< Sender of wagon */
+  address      sender;  /**< Sender of set */
   message      messages[];  /**< Messages stored in this batch */
 } __attribute__((packed)) BbBatch;
 
@@ -39,6 +39,7 @@ typedef struct {
 typedef struct {
   unsigned char wave; /**< Wave in which this set was sent */
   unsigned char step; /**< Step in which this set was sent */
+  unsigned int viewId; /**<Id of current view */
   BbBatch batches[];
 } __attribute__((packed)) BbSet;
 

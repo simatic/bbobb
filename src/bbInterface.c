@@ -28,6 +28,13 @@ int bbErrno;
 }*/
 
 int bbInit(){
+    
+    if(bbSingletonInit()) {
+    bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+			       __FILE__,
+			       __LINE__,
+			       "bbAutomatonStateInit error with singletonInit");
+    }
    
     bbAutomatonInit();
     

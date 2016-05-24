@@ -5,6 +5,13 @@
  */
 
 #include "bbCallBack.h"
+#include "bbComm.h"
+#include "bbSingleton.h"
+
+void callbackCircuitChange(circuitView *pcv){
+    bbSingleton.view = *pcv;
+    connectToOtherViewMembers(pcv);
+}
 
 void CallBackODeliver(address sender, BB_MType messageType, message * mp) {
     

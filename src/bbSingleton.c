@@ -15,15 +15,20 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include "bbSingleton.h"
+#include "bbComm.h"
 
 BbSingleton bbSingleton;
 
 int bbSingletonInit() {
+    int i;
     
     bbSingleton.initDone = false;
     
-    char * port = "8000";
+    char * port = bbGetLocalPort();
     bbSingleton.commForAccept = commNewForAccept(port);
+    for (i = 0 ; i < MAX_MEMB ; ++i) {
+        bbSingleton.commToViewMembers[i] = NULL;
+    }
     bbSingleton.msgQueue = newBqueue();
     
     bbSingleton.currentWave = 0;

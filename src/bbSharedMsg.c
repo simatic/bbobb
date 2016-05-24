@@ -10,6 +10,7 @@ BbSharedMsg* newBbSharedMsg(size_t size){
   BbSharedMsg *sharedMsg = malloc(offsetof(BbSharedMsg,msg)+size);
   assert(sharedMsg != NULL);
   pthread_mutex_init(&(sharedMsg->controlSharing.mutex), NULL);
+  sharedMsg->controlSharing.counter = 1;
   return sharedMsg;  
 }
 

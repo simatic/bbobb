@@ -46,7 +46,7 @@ typedef struct {
     trBqueue * msgQueue; /*!<trBqueue used to store bbMsg before treatement>*/
 } BbSingleton;
 
-extern BbSingleton * bbSingleton;
+extern BbSingleton bbSingleton;
 
 /*
  * @brief initialisation of @a Singleton

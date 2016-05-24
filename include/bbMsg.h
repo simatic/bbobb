@@ -39,6 +39,7 @@ typedef struct {
 typedef struct {
   unsigned char wave; /**< Wave in which this set was sent */
   unsigned char step; /**< Step in which this set was sent */
+  unsigned char  viewId;   /** View Id */
   BbBatch batches[];
 } __attribute__((packed)) BbSet;
 
@@ -52,7 +53,7 @@ typedef struct {
 */
 typedef struct {
   address       sender;   /**< Sender of message */
-  unsigned int  viewId;   /** View Id */
+  unsigned char  viewId;   /** View Id */
   circuitView   view;     /**< View at the moment the message was sent */
   bool          initDone; /**< Value of initDone at the moment the message was sent */
   unsigned char nbSets;   /**< Number of sets which are sent in this message */

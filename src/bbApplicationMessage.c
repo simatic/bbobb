@@ -67,6 +67,9 @@ int bbOBroadcast(t_typ messageTyp, message *mp) {
 
 void *bbODeliveries(void *null) {
     bool terminate = false;
+    // Boolean used to guarantee that a process starts delivering messages only
+    // when it has seen its own ARRIVAL message
+    static bool seenOwnArrival = false;
 
     do {
         message *mp;
@@ -83,14 +86,23 @@ void *bbODeliveries(void *null) {
 
             switch (mp->header.typ) {
                 case AM_ARRIVAL:
+                    if (!seenOwnArrival) {
+                        if (addrIsMine(((circuitView*)(mp->payload))->cv_joined)) {
+                            seenOwnArrival = true;
+                        }
+                    }
                 case AM_DEPARTURE:
-                    (*(bbSingleton.callbackCircuitChange))((circuitView*)(mp->payload));
+                    if (seenOwnArrival) {
+                        (*(bbSingleton.callbackCircuitChange))((circuitView*)(mp->payload));                        
+                    }
                     break;
                 case AM_TERMINATE:
                     terminate = true;
                     break;
                 default:
-                    (*(bbSingleton.callbackODeliver))(batch->sender, mp->header.typ, mp);
+                    if (seenOwnArrival) {
+                        (*(bbSingleton.callbackODeliver))(batch->sender, mp->header.typ, mp);
+                    }
                     break;
             }
         }

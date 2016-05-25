@@ -56,8 +56,8 @@ int bbOBroadcast(t_typ messageTyp, message *mp) {
     mp->header.typ = messageTyp;
 
     if (bbSingleton.automatonState == BB_STATE_ALONE) {
-        bqueueEnqueue(wagonsToDeliver, wagonToSend);
-        wagonToSend = newWiw();
+        bqueueEnqueue(bbSingleton.batchesToDeliver, bbSingleton.batchToSend);
+        bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(offsetof(BbSharedMsg,msg.body.set.batches)+bbSingleton.batchMaxLen);
     }
 
     // Message is already in batchToSend. All we have to do is to unlock the mutex.

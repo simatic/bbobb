@@ -23,7 +23,6 @@ BbSingleton bbSingleton;
 int bbSingletonInit() {
     int i;
     int rc;
-    BbSharedMsg *set = newBbSharedMsg(offsetof(BbSharedMsg,msg.body.set.batches)+bbSingleton.batchMaxLen);
     
     bbSingleton.initDone = false;
     
@@ -37,11 +36,7 @@ int bbSingletonInit() {
     bbSingleton.currentWave = 0;
     bbSingleton.currentStep = 0;
     
-    bbSingleton.batchToSend = newBatchInSharedMsg(set->msg.body.set.batches, set);
-    deleteBbSharedMsg(set);
-    set = NULL;
-    bbSingleton.batchToSend->batch->sender = bbSingleton.myAddress;
-    bbSingleton.batchToSend->batch->len = sizeof(BbBatch);
+    bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(offsetof(BbSharedMsg,msg.body.set.batches)+bbSingleton.batchMaxLen);
 
     pthread_mutex_init(&(bbSingleton.batchToSendMutex), NULL );
 

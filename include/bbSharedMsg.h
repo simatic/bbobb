@@ -69,6 +69,16 @@ void deleteBbSharedMsg(BbSharedMsg *sharedMsg);
 BbBatchInSharedMsg* newBatchInSharedMsg(BbBatch *batch, BbSharedMsg *sharedMsg);
 
 /**
+ * @brief Allocate a BbSharedMsg able to hold a @a set containing 
+ *        a batch which maximum size can be @a batchMaxSize bytes
+ *        The batch is empty. Its sender field is initialized with
+ *        bbSingleton.myAddress
+ * @param[in] batchMaxSize Size which must be reserved for the batch
+ * @return A pointer on the @a BbBatchInSharedMsg pointing on the batch
+ */
+BbBatchInSharedMsg* newEmptyBatchInNewSharedMsg(size_t batchMaxSize);
+
+    /**
  * @brief Creates a copy of @a batchInSharedMsg
  * @param[in] batchInSharedMsg the @a BbBatchInSharedMsg to copy
  * @return A pointer on a copy of @a batchInSharedMsg

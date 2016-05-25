@@ -47,6 +47,16 @@ BbBatchInSharedMsg* newBatchInSharedMsg(BbBatch *batch, BbSharedMsg *sharedMsg){
   return batchInSharedMsg;
 }
 
+BbBatchInSharedMsg* newEmptyBatchInNewSharedMsg(size_t batchMaxSize){
+    BbSharedMsg *sharedSet = newBbSharedMsg(batchMaxSize);
+    BbBatchInSharedMsg *batchInSharedMsg = newBatchInSharedMsg(sharedSet->msg.body.set.batches, sharedSet);
+    deleteBbSharedMsg(sharedSet);
+    sharedSet = NULL;
+    batchInSharedMsg->batch->sender = bbSingleton.myAddress;
+    batchInSharedMsg->batch->len = sizeof(BbBatch);
+    return batchInSharedMsg;
+}
+
 BbBatchInSharedMsg* copyBatchInSharedMsg(BbBatchInSharedMsg *batchInSharedMsg){
   BbBatchInSharedMsg *aCopyBatchInSharedMsg = malloc(sizeof(BbBatchInSharedMsg));
   assert(aCopyBatchInSharedMsg != NULL);

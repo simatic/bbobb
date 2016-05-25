@@ -50,28 +50,11 @@ int bbOBroadcast(t_typ messageTyp, message *mp) {
     return 0;
 }
 
-/**
- * @brief Fill parts of @a cv common to arrival and departure of a process
- * @param[in,out] cp The variable to fill
- * @param[in] circuit Circuit to use for filling @a cv->cv_nmemb and @a cv->cv_members
- */
-static void fillCv(circuitView *cp, addressSet circuit) {
-    address ad;
-    memset(cp, 0, sizeof (*cp)); // Sets all the fields of cv to 0
-    for (ad = 1; ad != 0; ad <<= 1) {
-        if (addrIsMember(ad, circuit)) {
-            cp->cv_members[cp->cv_nmemb] = ad;
-            cp->cv_nmemb += 1;
-        }
-    }
-}
-
 void *bbODeliveries(void *null) {
     bool terminate = false;
 
     do {
         message *mp;
-        circuitView cv;
         BbBatchInSharedMsg *batchInSharedMsg = bqueueDequeue(bbSingleton.batchesToDeliver);
         BbBatch *batch = batchInSharedMsg->batch;
 
@@ -85,14 +68,8 @@ void *bbODeliveries(void *null) {
 
             switch (mp->header.typ) {
                 case AM_ARRIVAL:
-                    fillCv(&cv, ((payloadArrivalDeparture*) (mp->payload))->circuit);
-                    cv.cv_joined = ((payloadArrivalDeparture*) (mp->payload))->ad;
-                    (*(bbSingleton.callbackCircuitChange))(&cv);
-                    break;
                 case AM_DEPARTURE:
-                    fillCv(&cv, ((payloadArrivalDeparture*) (mp->payload))->circuit);
-                    cv.cv_departed = ((payloadArrivalDeparture*) (mp->payload))->ad;
-                    (*(bbSingleton.callbackCircuitChange))(&cv);
+                    (*(bbSingleton.callbackCircuitChange))((circuitView*)(mp->payload));
                     break;
                 case AM_TERMINATE:
                     terminate = true;

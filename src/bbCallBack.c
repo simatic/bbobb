@@ -12,12 +12,25 @@
 void callbackCircuitChange(circuitView *pcv){
     bbSingleton.view = *pcv;
     connectToViewMembers(pcv);
-    if (addrIsMine(pcv->cv_members[0])){
-        // As current process is first member, it is responsible to bbOBroadcast
-        // view changes
-        bbSignalArrivalDepartures(
-            addrIsNull(pcv->cv_departed) ? AM_ARRIVAL : AM_DEPARTURE,
-            pcv);
+    if (addrIsNull(pcv->cv_joined)) {
+        // A process is gone
+        if (addrIsMine(pcv->cv_members[0])) {
+            // As current process is first member, it is responsible to 
+            // bbOBroadcast this departure information
+            bbSignalArrivalDepartures(AM_DEPARTURE, pcv);
+        }        
+    } else {
+        // A process has arrived
+        if (addrIsMine(pcv->cv_joined)){
+            // As current process is the joining process, it is responsible to 
+            // bbOBroadcast this arrival information
+            // If it was another process which bbOBroadcast this arrival
+            // information, there would be a risk that this information is
+            // stored in a batch which is transmitted thanks to RECOVER
+            // messages, thus not seen by our starting process (as initDone
+            // might still be false)
+            bbSignalArrivalDepartures(AM_ARRIVAL, pcv);
+        }
     }
 }
 

@@ -115,8 +115,3 @@ message *nextMsgInBatch(BbBatch *b, message *mp){
   else
     return mp2;
 }
-
-message * allocInBatchToSend(int payloadSize){
-    // TODO To be completed
-    return NULL;
-}

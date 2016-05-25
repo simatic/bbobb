@@ -96,11 +96,4 @@ message *firstMsgInBatch(BbBatch *b);
  */
 message *nextMsgInBatch(BbBatch *w, message *mp);
 
-/**
- * @brief Allocate a message in @a bbSingleton.batchToSend
- * @param[in] payloadSize the required size to allocate
- * @return A pointer on a message
- */
-message * allocInBatchToSend(int payloadSize);
-
 #endif /* _BB_MSG_H */

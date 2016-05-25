@@ -6,6 +6,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stddef.h>
 #include "errorTrains.h"
 
 #include "bbSingleton.h"
@@ -26,7 +27,21 @@ message *bbNewmsg(int payloadSize) {
             ERROR_AT_LINE(EXIT_FAILURE, rc, __FILE__, __LINE__, "pthread_cond_wait");
     }
 
-    mp = allocInBatchToSend(payloadSize);
+    /* If the message is too big whereas the batch is empty, we have to send
+     * it properly : we need to increase the batch length
+     * The empty condition was checked before (in while) so we don't have
+     * to check it again.*/
+    if (payloadSize > bbSingleton.batchMaxLen) {
+        int newSharedMsgLen = offsetof(BbSharedMsg,msg.body.set.batches[0].messages) + payloadSize;
+        bbSingleton.batchToSend->sharedMsg = realloc(bbSingleton.batchToSend->sharedMsg, newSharedMsgLen);
+        bbSingleton.batchToSend->batch = bbSingleton.batchToSend->sharedMsg->msg.body.set.batches;
+    }
+
+    // We initialize message header and adapt containing batch length.
+    BbBatch *batch = bbSingleton.batchToSend->sharedMsg->msg.body.set.batches;
+    mp = (message*) (((char*) batch) + batch->len);
+    mp->header.len = sizeof (messageHeader) + payloadSize;
+    batch->len += mp->header.len;
 
     // MUTEX_UNLOCK will be done in bbOBroadcast
     //

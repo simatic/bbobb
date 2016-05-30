@@ -10,6 +10,7 @@
 #include <sys/uio.h>
 #include <stddef.h>
 #include "bbMsg.h"
+#include "address.h"
 #include "bbSingleton.h"
 #include "bbStateMachine.h"
 
@@ -89,12 +90,12 @@ void buildNewSet() {
     newSet.len = iov[iovcnt].iov_len;
     iovcnt++;
     
-    for(i=0, senderBatchToAdd; i < nbSetToAdd ; i++, senderBatchToAdd = predInView(senderBatchToAdd, bbSingleton.view)) { //TO DO : pred in view
+    for(i=0, senderBatchToAdd; i < nbSetToAdd ; i++, senderBatchToAdd = addrPrec(senderBatchToAdd, bbSingleton.view)) { //TO DO : pred in view
     //TO DO :ask for addreToIndex
-        if(rcvdBatch[bbSingleton.currentWave][senderBatchToAdd] != NULL) {
-            int rank = addrToIndex(senderBatchToAdd); //TO DO : addrToIndex
-            iov[iovcnt].iov_base = rcvdBatch[bbSingleton.currentWave][senderBatchToAdd]; //Possible à faire, position dans rcvdBatch
-            iov[iovcnt].iov_len = rcvdBatch[bbSingleton.currentWave][senderBatchToAdd]->batch->len;
+        int rank = addrToRank(senderBatchToAdd);
+        if(rcvdBatch[rank][bbSingleton.currentWave] != NULL) {
+            iov[iovcnt].iov_base = rcvdBatch[rank][bbSingleton.currentWave];
+            iov[iovcnt].iov_len = rcvdBatch[rank][bbSingleton.currentWave]->batch->len;
             newSet.len += iov[iovcnt].iov_len;
             iovcnt++;
         }

@@ -40,10 +40,15 @@ typedef struct {
     unsigned char currentStep; /*!<current step in current wave>*/
     unsigned char viewSize; /*!<number of paticipants, max 256>*/
     unsigned int viewId; /*current view ID number*/
-    circuitView * view; /*!<current view of participants>*/
+    circuitView view; /*!<current view of participants>*/
     pthread_mutex_t viewChangeMutex; /*!<mutex used when view changes>*/
     trComm * commForAccept; /*!<trComm used to accept connections>*/
-    trBqueue * msgQueue; /*!<trBqueue used to store bbMsg before treatement>*/
+    trComm* commToViewMembers[MAX_MEMB]; /*!< trComm used to communicate with other view members */
+    trBqueue * msgQueue; /*!<trBqueue used to store bbMsg before treatement */
+    BbBatchInSharedMsg * batchToSend; /*!<next batch to send with bbobb */
+    pthread_mutex_t batchToSendMutex; /*!< mutex used to synchronize batchToSend modifications */
+    pthread_cond_t  batchToSendCond;  /*!< condition used to synchronize batchToSend modifications */
+    int batchMaxLen; /*!< Ideal maximum length for sent batches */
 } BbSingleton;
 
 extern BbSingleton bbSingleton;

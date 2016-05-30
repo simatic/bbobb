@@ -27,16 +27,16 @@
 #include <assert.h>
 #include <pthread.h>
 #include <string.h>
+#include <stddef.h>
 
 #include "bbError.h"
-#include "../include/bbiomsg.h"
+#include "bbiomsg.h"
+#include "bbMsg.h"
 
 BbSharedMsg * bbReceive(trComm * aComm){
   BbSharedMsg * msgExt = NULL;
   int nbRead, nbRead2;
   int len;
-  int j;
-  bool isPred;
 
   nbRead = commReadFully(aComm, &len, sizeof(len));
   if (nbRead == sizeof(len)) {
@@ -50,6 +50,7 @@ BbSharedMsg * bbReceive(trComm * aComm){
       return NULL;
     }
   }
+  return NULL;
 }
 
 void tOBroadcast_RECOVER() {
@@ -58,7 +59,7 @@ void tOBroadcast_RECOVER() {
     
     if(bbSingleton.initDone) {
         fset = createSet(bbSingleton.currentWave-1);
-        sset = createSet(bbSingleton.currentWave);;
+        sset = createSet(bbSingleton.currentWave);
     }
     
     int len = offsetof(BbMsg, body.recover.sets) + (bbSingleton.initDone ? fset->len + sset->len : 0);
@@ -68,13 +69,13 @@ void tOBroadcast_RECOVER() {
     msg->len = len;
     msg->type = BB_MSG_RECOVER;
     msg->body.recover.sender = bbSingleton.myAddress;
-    msg->body.recover.view = *(bbSingleton.view);
+    msg->body.recover.view = bbSingleton.view;
     msg->body.recover.initDone = bbSingleton.initDone;
     msg->body.recover.viewId = bbSingleton.viewId;
     if(bbSingleton.initDone) {
         msg->body.recover.nbSets = 2;
-        memcpy(msg->body.recover.sets, fset->body.set, fset->len - offsetof(BbMsg, body.set));
-        memcpy((char*)msg->body.recover.sets + fset->len, sset->body.set, sset->len - offsetof(BbMsg, body.set));       
+        memcpy(msg->body.recover.sets, &(fset->body.set), fset->len - offsetof(BbMsg, body.set));
+        memcpy((char*)msg->body.recover.sets + fset->len, &(sset->body.set), sset->len - offsetof(BbMsg, body.set));       
     } else {
         msg->body.recover.nbSets = 0;
     }

@@ -19,7 +19,7 @@
 /**
  * @brief Max size of a set
  */
- extern int setMaxLen;
+ extern int bbSetMaxLen;
 
 /**
  * @brief The limit of time to wait
@@ -36,8 +36,14 @@ extern int bbWaitDefaultTime; /**<in microsecond*/
  */
 extern int bbErrno;
 
+/**
+ * @brief function uses to init bbobb protocol
+ */
 int bbInit();
 
+/**
+ * @brief function uses to terminate bbobb protocol
+ */
 int bbTerminate();
 
 #endif /* BBOBB_H */

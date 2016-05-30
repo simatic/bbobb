@@ -3,6 +3,7 @@
 #include "bbMsg.h"
 #include "bbComm.h"
 #include "bbSingleton.h"
+#include "bbSharedMsg.h"
 #include <error.h>
 
 // VAR STATICS setrecovered[], nbSetRcvd], waitingset
@@ -11,7 +12,7 @@
 // fonctions à faire: sizeview, newview
 //A ajouter = remplir waiting set, queue, etc
 static int nbRecoverRcvd; 
-static BbBatch* rcvdBatch[][16];//[sizeview][maxwave] TO DO : refactor to BbBatchInSharedMsg
+//BbBatchInSharedMsg* rcvdBatch[][16];//[sizeview][maxwave] TO DO : refactor to BbBatchInSharedMsg
 static BbSet* waitingSets[];//size?
 static unsigned char waveMax;
 BbState bbAutomatonState;
@@ -40,8 +41,6 @@ BbStateMachineFunc bbTransitions[BB_LAST_STATE+1][BB_LAST_MSG+1] = {
 int bbAutomatonInit(){
     int error = 0;
     
-    rcvdBatch = NULL;
-    
     pthread_t msgTreatementThread;
     error = pthread_create(&msgTreatementThread, NULL, bbMsgTreatement, NULL);
     if(error){
@@ -51,6 +50,7 @@ int bbAutomatonInit(){
                     __LINE__,
                     "bbAutomatonStateInit error with msgTreatementThreadInit");
     }
+    pthread_detach(msgTreatementThread);
     
     pthread_t waitCommForAcceptThread;
     error = pthread_create(&waitCommForAcceptThread, NULL, waitCommForAccept, NULL);
@@ -60,7 +60,7 @@ int bbAutomatonInit(){
                     __FILE__,
                     __LINE__,
                     "bbAutomatonStateInit error waitCommForAcceptThread");
-    };
+    }
     
     
     printf("AutomatonInit : OK\n");
@@ -68,11 +68,11 @@ int bbAutomatonInit(){
     return 0;
 }
 
-void * bbMsgTreatement(void){ //TO DO rajouter mutex
+void * bbMsgTreatement(void){
 
-    BbMsg * msg = malloc(sizeof(BbMsg));
+    BbMsg * msg = NULL;
     do {
-        msg = bqueueDequeue(bbSingleton.msgQueue);
+        msg = (BbMsg*)bqueueDequeue(bbSingleton.msgQueue);
         //bbStateMachineTransition(msg);
         if(msg!=NULL){
             printf("message reçus !");
@@ -115,7 +115,7 @@ BbState bbError(BbState state, BbMsg* pMsg){
   return BB_STATE_ALONE; 
 }
 
-
+/*
 BbState bbProcessRecover(BbState state, BbSharedMsg* pMsg){//A CHANGER?
     char* offset;
   //  offset += pMsg->msg.body.recover.sets[0].len;
@@ -231,5 +231,5 @@ BbState bbSaveSet(BbState state, BbSharedMsg* pMsg){//PB VUE
     }
   return BB_STATE_ALONE; // TODO : Put the correct return value
 }
-
+*/
 

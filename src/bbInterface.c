@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "interface.h"
+#include "bbCallBack.h"
 #include "bbInterface.h"
 #include "management_addr.h"
 #include "iomsg.h"
@@ -29,14 +30,30 @@ int bbErrno;
 
 int bbInit(){
     
+    bbErrno = 0;
+    
     if(bbSingletonInit()) {
-    bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
-			       __FILE__,
-			       __LINE__,
-			       "bbAutomatonStateInit error with singletonInit");
+        bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+                                    __FILE__,
+                                    __LINE__,
+                                    "bbAutomatonStateInit error with singletonInit");
     }
    
-    bbAutomatonInit();
+    bbErrno=bbAutomatonInit();
+    if(bbSingleton) {
+        bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+                                    __FILE__,
+                                    __LINE__,
+                                    "bbAutomatonStateInit error with AutomatonInit");        
+    }
+    
+    bbErrno=trInit(0, 0, 0, 0, CallbackCircuitChange, CallbackODeliver, UNIFORM_TOTAL_ORDER);
+    if(bbErrno){
+        bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+                                    __FILE__,
+                                    __LINE__,
+                                    "bbAutomatonStateInit error with trInit");
+    }
     
     return 0;   
 }

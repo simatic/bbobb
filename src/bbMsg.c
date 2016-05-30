@@ -8,10 +8,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/uio.h>
+#include <stddef.h>
 #include "bbMsg.h"
 #include "bbSingleton.h"
-
-static BbBatch* rcvdBatch[][];//[sizeview][maxwave] tempos
+#include "bbStateMachine.h"
 
 /*
 BbBatch initBatch () {
@@ -42,8 +42,8 @@ BbMsg * createSet(int waveNum) {
     int processIndex;
     
     for(processIndex=0; processIndex<MAX_MEMB; processIndex++) {
-        if(rcvdBatch[waveNum][processIndex]->len != NULL) {
-            lenOfBatches += rcvdBatch[waveNum][processIndex]->len;
+        if(rcvdBatch[waveNum][processIndex] != NULL) {
+            lenOfBatches += rcvdBatch[waveNum][processIndex]->batch->len;
         }
     }
     
@@ -61,8 +61,8 @@ BbMsg * createSet(int waveNum) {
     lenOfBatches = 0;
     for(processIndex=0; processIndex<MAX_MEMB; processIndex++) {
         if(rcvdBatch[waveNum][processIndex] != NULL) {
-            memcpy((char*)&(set->body.set.batches)+lenOfBatches, rcvdBatch[waveNum][processIndex], rcvdBatch[waveNum][processIndex]->len);
-            lenOfBatches += rcvdBatch[waveNum][processIndex]->len;
+            memcpy((char*)&(set->body.set.batches)+lenOfBatches, rcvdBatch[waveNum][processIndex], rcvdBatch[waveNum][processIndex]->batch->len);
+            lenOfBatches += rcvdBatch[waveNum][processIndex]->batch->len;
         }
     }
     
@@ -75,9 +75,9 @@ void buildNewSet() {
     int iovcnt = 0;
     int senderBatchToAdd = 0;
     int i;
-    int nbSetToAdd = (2^bbSingleton.currentStep < bbSingleton.view->cv_nmemb - 2^bbSingleton.currentStep ?
+    int nbSetToAdd = (2^bbSingleton.currentStep < bbSingleton.view.cv_nmemb - 2^bbSingleton.currentStep ?
                         2^bbSingleton.currentStep :
-                        bbSingleton.view->cv_nmemb - 2^bbSingleton.currentStep);
+                        bbSingleton.view.cv_nmemb - 2^bbSingleton.currentStep);
     
     newSet.type = BB_MSG_SET;
     newSet.body.set.viewId = bbSingleton.viewId;
@@ -92,9 +92,9 @@ void buildNewSet() {
     for(i=0, senderBatchToAdd; i < nbSetToAdd ; i++, senderBatchToAdd = predInView(senderBatchToAdd, bbSingleton.view)) { //TO DO : pred in view
     //TO DO :ask for addreToIndex
         if(rcvdBatch[bbSingleton.currentWave][senderBatchToAdd] != NULL) {
-            int rank = addrToIndex(senderBatchToAdd);
+            int rank = addrToIndex(senderBatchToAdd); //TO DO : addrToIndex
             iov[iovcnt].iov_base = rcvdBatch[bbSingleton.currentWave][senderBatchToAdd]; //Possible à faire, position dans rcvdBatch
-            iov[iovcnt].iov_len = rcvdBatch[bbSingleton.currentWave][senderBatchToAdd]->len;
+            iov[iovcnt].iov_len = rcvdBatch[bbSingleton.currentWave][senderBatchToAdd]->batch->len;
             newSet.len += iov[iovcnt].iov_len;
             iovcnt++;
         }

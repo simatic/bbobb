@@ -27,7 +27,7 @@ extern "C" {
 
 void * waitCommForAccept(void *);
 
-void * bbConnectionMgt(void *);
+void * bbConnectionMgt(void * arg);
 
 BbSharedMsg * bbReceive(trComm * aComm);
 

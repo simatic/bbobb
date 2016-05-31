@@ -53,7 +53,7 @@ typedef struct {
 */
 typedef struct {
   address       sender;   /**< Sender of message */
-  unsigned int  viewId;   /** View Id */
+  unsigned char  viewId;   /** View Id */
   circuitView   view;     /**< View at the moment the message was sent */
   bool          initDone; /**< Value of initDone at the moment the message was sent */
   unsigned char nbSets;   /**< Number of sets which are sent in this message */

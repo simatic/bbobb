@@ -90,9 +90,10 @@ void buildNewSet() {
     newSet.len = iov[iovcnt].iov_len;
     iovcnt++;
     
-    for(i=0, senderBatchToAdd; i < nbSetToAdd ; i++, senderBatchToAdd = addrPrec(senderBatchToAdd, bbSingleton.view)) { //TO DO : pred in view
+    int rank;
+    for(i=0, senderBatchToAdd; i < nbSetToAdd ; i++, senderBatchToAdd = addrPrec(senderBatchToAdd, bbSingleton.view.cv_members)) { //TO DO : pred in view
     //TO DO :ask for addreToIndex
-        int rank = addrToRank(senderBatchToAdd);
+        rank = addrToRank(senderBatchToAdd);
         if(rcvdBatch[rank][bbSingleton.currentWave] != NULL) {
             iov[iovcnt].iov_base = rcvdBatch[rank][bbSingleton.currentWave];
             iov[iovcnt].iov_len = rcvdBatch[rank][bbSingleton.currentWave]->batch->len;

@@ -35,10 +35,10 @@ void callbackCircuitChange(circuitView *pcv){
     }
 }
 
-void CallBackODeliver(address sender, t_typ messageType, message * mp) {
+void callbackODeliver(address sender, t_typ messageType, message * mp) {
     BbMsg * msg = (BbMsg*)(mp->payload);
     BbSharedMsg * sharedMsg = newBbSharedMsg(msg->len);
-    memcpy(sharedMsg->msg, msg, msg->len);
+    memcpy(&(sharedMsg->msg), msg, msg->len);
     
     bqueueEnqueue(bbSingleton.msgQueue, (void*)sharedMsg);
 }

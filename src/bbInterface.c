@@ -17,6 +17,8 @@
 #include "iomsg.h"
 #include "bbStateMachine.h"
 #include "bbError.h"
+#include "bbSingleton.h"
+#include "trains.h"
 
 sem_t *bbSem_init_done;
 
@@ -40,14 +42,14 @@ int bbInit(){
     }
    
     bbErrno=bbAutomatonInit();
-    if(bbSingleton) {
+    if(bbErrno) {
         bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
                                     __FILE__,
                                     __LINE__,
                                     "bbAutomatonStateInit error with AutomatonInit");        
     }
     
-    bbErrno=trInit(0, 0, 0, 0, CallbackCircuitChange, CallbackODeliver, UNIFORM_TOTAL_ORDER);
+    bbErrno=trInit(0, 0, 0, 0, callbackCircuitChange, callbackODeliver, UNIFORM_TOTAL_ORDER);
     if(bbErrno){
         bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
                                     __FILE__,

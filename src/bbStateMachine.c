@@ -19,6 +19,8 @@
 static int nbRecoverRcvd; 
 static bool rcvdSet[MAX_MEMB][WAVE_MAX];
 static trList *waitingSharedMsg;
+static unsigned char waveMax = 255;
+
 //BbState bbAutomatonState;
 //int addrToIndex();
 
@@ -144,7 +146,7 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pSharedMsg) {//A CHANGER?
                     pBatch = getBatchInSharedMsg(pSharedMsg, pPreviousBatch, 0);
 
                     if (rcvdBatch[(pSharedMsg->msg.body.recover.sets[0].set.wave)][pBatch->batch->sender] == NULL) {
-                        rcvdBatch[(pSharedMsg->msg.body.recover.sets[0].set.wave)][pBatch->batch->sender] == pBatch;
+                        rcvdBatch[(pSharedMsg->msg.body.recover.sets[0].set.wave)][pBatch->batch->sender] = pBatch;
                     } else {
                         deleteBatchInSharedMsg(pPreviousBatch);
                     }
@@ -161,7 +163,7 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pSharedMsg) {//A CHANGER?
             do {
                 pBatch = getBatchInSharedMsg(pSharedMsg, pBatch, 1);
                 if (rcvdBatch[(pSet->wave)][pBatch->batch->sender] == NULL) {
-                    rcvdBatch[(pSet->wave)][pBatch->batch->sender] == pBatch;
+                    rcvdBatch[(pSet->wave)][pBatch->batch->sender] = pBatch;
                 } else {
                     deleteBatchInSharedMsg(pPreviousBatch);
                 }
@@ -176,13 +178,19 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pSharedMsg) {//A CHANGER?
         if (nbRecoverRcvd == bbSingleton.view.cv_nmemb) {
             //forceDeliver()
             //sendBatchForStep0()
-            do {
-                pSet = (BbSharedMsg*) listRemoveFirst(waitingSharedMsg); //TO DO : modifier :'(
-                bbSaveSet(state, pSharedMsg);
-            } while (pSet != NULL);
-
+            BbSharedMsg *pSharedMsg;
             if (nbRecoverRcvd == 1) {
+                if ((pSharedMsg = (BbSharedMsg*) listRemoveFirst(waitingSharedMsg)) != NULL) {
+                    bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+			       __FILE__,
+			       __LINE__,
+			       "Going to BB_STATE_ALONE state and there are waiting sets !");
+                }
                 return BB_STATE_ALONE;
+            }
+            bbSingleton.automatonState = BB_STATE_SEVERAL;
+            while ((pSharedMsg = (BbSharedMsg*) listRemoveFirst(waitingSharedMsg)) != NULL) {
+                bbStateMachineTransition(pSharedMsg);
             }
             return BB_STATE_SEVERAL;
         }
@@ -202,7 +210,7 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
 
     nbRecoverRcvd = 0;
     cleanList(waitingSharedMsg);
-    bbSingleton.view = newView(); // TODO a definir le calcul de la nouvelle vue
+    //bbSingleton.view = newView(); // TODO a definir le calcul de la nouvelle vue
     if (bbSingleton.initDone) {
         bbSingleton.viewId += 1;
     } else {
@@ -238,7 +246,7 @@ void forceDeliver() {
     if (bbSingleton.initDone) {
 
 
-        if (bbSingleton.reqOrder == UNIFORM_TOTAL_ORDER) {
+        if (bbSingleton.reqOrder == BB_UNIFORM_TOTAL_ORDER) {
 
             for (i = 0; i < MAX_MEMB; i++) {//foreach key in rcvdBatch[wave-1].keys() do
                 if (rcvdBatch[i][bbSingleton.currentWave - 1] != NULL){ // TODO : METTRE A NULL

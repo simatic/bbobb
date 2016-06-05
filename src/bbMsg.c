@@ -76,9 +76,9 @@ void buildNewSet() {
     int iovcnt = 0;
     int senderBatchToAdd = 0;
     int i;
-    int nbSetToAdd = (2^bbSingleton.currentStep < bbSingleton.view.cv_nmemb - 2^bbSingleton.currentStep ?
-                        2^bbSingleton.currentStep :
-                        bbSingleton.view.cv_nmemb - 2^bbSingleton.currentStep);
+    int nbBatchesToAdd = ((1 << bbSingleton.currentStep) < bbSingleton.view.cv_nmemb - (1 << bbSingleton.currentStep) ?
+                        1 << bbSingleton.currentStep :
+                        bbSingleton.view.cv_nmemb - (1 << bbSingleton.currentStep));
     
     newSet.type = BB_MSG_SET;
     newSet.body.set.viewId = bbSingleton.viewId;
@@ -91,8 +91,7 @@ void buildNewSet() {
     iovcnt++;
     
     int rank;
-    for(i=0, senderBatchToAdd; i < nbSetToAdd ; i++, senderBatchToAdd = addrPrec(senderBatchToAdd, bbSingleton.view.cv_members)) { //TO DO : pred in view
-    //TO DO :ask for addreToIndex
+    for(i=0, senderBatchToAdd; i < nbBatchesToAdd ; i++, senderBatchToAdd = addrPrec(senderBatchToAdd, bbSingleton.view.cv_members)) {
         rank = addrToRank(senderBatchToAdd);
         if(rcvdBatch[rank][bbSingleton.currentWave] != NULL) {
             iov[iovcnt].iov_base = rcvdBatch[rank][bbSingleton.currentWave];

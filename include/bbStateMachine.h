@@ -32,6 +32,8 @@ typedef enum {
 
 #define BB_LAST_STATE BB_STATE_VIEW_CHANGE
 
+#define WAVE_MAX 255
+
 /** 
  * @brief Type of function used to code transitions in state machine
  */

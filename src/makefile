@@ -56,7 +56,34 @@ $(DYNAMIC_LIB): $(OBJECTS_DYNAMIC)
 $(JNI_LIB): $(DYNAMIC_LIB)
 	ln -s $(DYNAMIC_LIB) $(JNI_LIB)
 
+bbApplicationMessage_dyn.o: bbApplicationMessage.c
+	$(CC) $(CFLAGS) $^  -c -o $@
+
+bbCallBack_dyn.o: bbCallBack.c
+	$(CC) $(CFLAGS) $^  -c -o $@
+
+bbComm_dyn.o: bbComm.c
+	$(CC) $(CFLAGS) $^  -c -o $@
+
 bbError_dyn.o: bbError.c
+	$(CC) $(CFLAGS) $^  -c -o $@
+
+bbInterface_dyn.o: bbInterface.c
+	$(CC) $(CFLAGS) $^  -c -o $@
+
+bbiomsg_dyn.o: bbiomsg.c
+	$(CC) $(CFLAGS) $^  -c -o $@
+
+bbMsg_dyn.o: bbMsg.c
+	$(CC) $(CFLAGS) $^  -c -o $@
+
+bbSharedMsg_dyn.o: bbSharedMsg.c
+	$(CC) $(CFLAGS) $^  -c -o $@
+
+bbSignalArrival_dyn.o: bbSignalArrival.c
+	$(CC) $(CFLAGS) $^  -c -o $@
+
+bbSingleton_dyn.o: bbSingleton.c
 	$(CC) $(CFLAGS) $^  -c -o $@
 
 bbStateMachine_dyn.o: bbStateMachine.c

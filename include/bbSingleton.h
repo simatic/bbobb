@@ -28,8 +28,6 @@
     FALSE,
 } bool;*/
 
-#define WAVE_MAX 255
-
 /*
  * @brief structure to contain all global var of bbobb
  */
@@ -59,8 +57,6 @@ typedef struct {
 } BbSingleton;
 
 extern BbSingleton bbSingleton;
-
-unsigned char waveMax = 255;
 
 extern BbBatchInSharedMsg* rcvdBatch[MAX_MEMB][WAVE_MAX];//[sizeview][maxwave] TO DO : refactor to BbBatchInSharedMsg
 

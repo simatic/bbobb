@@ -47,7 +47,8 @@ void * bbConnectionMgt(void *arg){
         if(aMsg != NULL) {
             bqueueEnqueue(bbSingleton.msgQueue, &aMsg);
         }
-    }while(aMsg != NULL); 
+    }while(aMsg != NULL);
+    return NULL;
 }
 
 char *bbGetLocalPort(){

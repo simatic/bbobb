@@ -96,6 +96,8 @@ message *firstMsgInBatch(BbBatch *b);
  */
 message *nextMsgInBatch(BbBatch *w, message *mp);
 
-BbMsg * createSet(int waveNum);
+BbSharedMsg * createSet(int waveNum);
+
+BbSharedMsg * buildNewSet();
 
 #endif /* _BB_MSG_H */

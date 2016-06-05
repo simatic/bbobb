@@ -13,6 +13,8 @@
 #include "address.h"
 #include "bbSingleton.h"
 #include "bbStateMachine.h"
+#include "bbError.h"
+#include "bbSharedMsg.h"
 
 /*
 BbBatch initBatch () {
@@ -34,9 +36,10 @@ BbBatch newBbBatch (address sender, message messages[]) {
     return batch;
 }
 */
+address bbAddrPrec(address ad);
 
-BbMsg * createSet(int waveNum) {
-    BbMsg * set = NULL;
+BbSharedMsg * createSet(int waveNum) {
+    BbSharedMsg * set = NULL;
     
     int lenOfSet;
     int lenOfBatches;
@@ -48,21 +51,21 @@ BbMsg * createSet(int waveNum) {
         }
     }
     
-    lenOfSet = offsetof(BbMsg, body.set.batches) + lenOfBatches;
-    set = malloc(lenOfSet);
+    lenOfSet = offsetof(BbSharedMsg, msg.body.set.batches) + lenOfBatches;
+    set = newBbSharedMsg(lenOfSet);
     
     //We fill the fields of set
-    set->len = lenOfSet;
-    set->type = BB_MSG_SET;
-    set->body.set.viewId = bbSingleton.viewId;
-    set->body.set.wave = waveNum;
-    set->body.set.step = 0; //unused in case of RECOVER messages
+    set->msg.len = lenOfSet;
+    set->msg.type = BB_MSG_SET;
+    set->msg.body.set.viewId = bbSingleton.viewId;
+    set->msg.body.set.wave = waveNum;
+    set->msg.body.set.step = 0; //unused in case of RECOVER messages
     
     //We fill the batches of the set
     lenOfBatches = 0;
     for(processIndex=0; processIndex<MAX_MEMB; processIndex++) {
         if(rcvdBatch[waveNum][processIndex] != NULL) {
-            memcpy((char*)&(set->body.set.batches)+lenOfBatches, rcvdBatch[waveNum][processIndex], rcvdBatch[waveNum][processIndex]->batch->len);
+            memcpy((char*)&(set->msg.body.set.batches)+lenOfBatches, rcvdBatch[waveNum][processIndex], rcvdBatch[waveNum][processIndex]->batch->len);
             lenOfBatches += rcvdBatch[waveNum][processIndex]->batch->len;
         }
     }
@@ -70,8 +73,8 @@ BbMsg * createSet(int waveNum) {
     return set;
 }
 
-void buildNewSet() {
-    BbMsg newSet;
+BbSharedMsg buildNewSet() {
+    BbSharedMsg * newSet;
     struct iovec iov[MAX_MEMB];
     int iovcnt = 0;
     int senderBatchToAdd = 0;
@@ -80,26 +83,29 @@ void buildNewSet() {
                         1 << bbSingleton.currentStep :
                         bbSingleton.view.cv_nmemb - (1 << bbSingleton.currentStep));
     
-    newSet.type = BB_MSG_SET;
-    newSet.body.set.viewId = bbSingleton.viewId;
-    newSet.body.set.wave = bbSingleton.currentWave;
-    newSet.body.set.step = bbSingleton.currentStep;
+    newSet = newBbSharedMsg();
+    newSet->msg.type = BB_MSG_SET;
+    newSet->msg.body.set.viewId = bbSingleton.viewId;
+    newSet->msg.body.set.wave = bbSingleton.currentWave;
+    newSet->msg.body.set.step = bbSingleton.currentStep;
     
     iov[iovcnt].iov_base = &newSet;
-    iov[iovcnt].iov_len = offsetof(BbMsg, body.set.batches);
-    newSet.len = iov[iovcnt].iov_len;
+    iov[iovcnt].iov_len = offsetof(BbSharedMsg, msg.body.set.batches);
+    newSet->msg.len = iov[iovcnt].iov_len;
     iovcnt++;
     
     int rank;
-    for(i=0, senderBatchToAdd; i < nbBatchesToAdd ; i++, senderBatchToAdd = addrPrec(senderBatchToAdd, bbSingleton.view.cv_members)) {
+    for(i=0, senderBatchToAdd; i < nbBatchesToAdd ; i++, senderBatchToAdd = bbAddrPrec(senderBatchToAdd)) {
         rank = addrToRank(senderBatchToAdd);
         if(rcvdBatch[rank][bbSingleton.currentWave] != NULL) {
             iov[iovcnt].iov_base = rcvdBatch[rank][bbSingleton.currentWave];
             iov[iovcnt].iov_len = rcvdBatch[rank][bbSingleton.currentWave]->batch->len;
-            newSet.len += iov[iovcnt].iov_len;
+            newSet->msg.len += iov[iovcnt].iov_len;
             iovcnt++;
         }
     }
+    
+    return newSet;
 }
 
 message *firstMsgInBatch(BbBatch *b){
@@ -115,4 +121,24 @@ message *nextMsgInBatch(BbBatch *b, message *mp){
     return NULL;
   else
     return mp2;
+}
+
+address bbAddrPrec(address ad) {
+    int i = 0;
+    for(i=0; addrIsEqual(ad, bbSingleton.view.cv_members[i]) && i < MAX_MEMB + 1; i++) {
+        //find pos of ad in current view
+    }
+    if(i==MAX_MEMB) {
+        bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+                                   error,
+                                   __FILE__,
+                                   __LINE__,
+                                   "error to find address of predecessor, address didn't found");
+    }
+    
+    if(i==0) {
+        return bbSingleton.view.cv_members[bbSingleton.view.cv_nmemb - 1];
+    } else {
+        return bbSingleton.view.cv_members[i - 1];
+    }
 }

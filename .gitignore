@@ -7,3 +7,5 @@ html
 doc
 # All that is generated
 lib
+# All that is related to Netbeans
+nbproject

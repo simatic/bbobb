@@ -19,8 +19,11 @@
 #include "bbError.h"
 #include "bbSingleton.h"
 #include "trains.h"
+#include "bbobb.h"
 
 sem_t *bbSem_init_done;
+
+int bbErrno;
 
 /*int main(int argc, char* argv[]){
     bbInit();

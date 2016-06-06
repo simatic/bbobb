@@ -164,7 +164,7 @@ int main(int argc, char *argv[]){
   }
 
   // We initialize the trains protocol
-  rc = bbInit(myCallbackCircuitChange, myCallbackODeliver, reqOrder);
+  rc = bbInit(1024, 10, 1000000,myCallbackCircuitChange, myCallbackODeliver, reqOrder);
   if (rc < 0) {
     bbErrorAtLineWithoutErrnum(rc, __FILE__, __LINE__, "tr_init()");
     return EXIT_FAILURE;

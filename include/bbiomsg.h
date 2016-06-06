@@ -78,4 +78,6 @@ int bbSendOther(address addr, bool isPred, MType type, address sender);
  */
 int bbSendSet(address addr, bool isPred, ltsStruct lts);
 
+void tOBroadcast_RECOVER();
+
 #endif /* _BBIOMSG_H */

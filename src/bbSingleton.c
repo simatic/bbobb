@@ -20,10 +20,14 @@
 
 BbSingleton bbSingleton;
 
-int bbSingletonInit() {
+int bbSingletonInit(CallbackCircuitChange callbackCircuitChange, CallbackODeliver callbackODeliver, BbOrder reqOrder) {
     int i;
     int rc;
     
+    bbSingleton.callbackCircuitChange = callbackCircuitChange;
+    bbSingleton.callbackODeliver = callbackODeliver;
+    bbSingleton.reqOrder = reqOrder;
+
     bbSingleton.initDone = false;
     
     char * port = bbGetLocalPort();

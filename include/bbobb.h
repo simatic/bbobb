@@ -14,7 +14,13 @@
 #ifndef BBOBB_H
 #define BBOBB_H
 
-#include "bbStateMachine.h"
+#include "bbApplicationMessage.h"
+
+typedef enum {
+    BB_TOTAL_ORDER,
+    BB_UNIFORM_TOTAL_ORDER,
+    BB_CAUSAL_ORDER
+} BbOrder;
 
 /**
  * @brief Max size of a set
@@ -39,7 +45,7 @@ extern int bbErrno;
 /**
  * @brief function uses to init bbobb protocol
  */
-int bbInit();
+int bbInit(CallbackCircuitChange callbackCircuitChange, CallbackODeliver callbackODeliver, BbOrder reqOrder);
 
 /**
  * @brief function uses to terminate bbobb protocol

@@ -23,13 +23,6 @@ typedef enum {
   BB_STATE_VIEW_CHANGE, /**< Managing a view change */
 } BbState;
 
-typedef enum {
-    BB_TOTAL_ORDER,
-    BB_UNIFORM_TOTAL_ORDER,
-    BB_CAUSAL_ORDER,
-    BB_UNIFORM_TOTAL_CAUSAL_ORDER
-} BbOrder;
-
 #define BB_LAST_STATE BB_STATE_VIEW_CHANGE
 
 #define WAVE_MAX 255

@@ -87,42 +87,36 @@ message *nextMsgInBatch(BbBatch *b, message *mp){
     return mp2;
 }
 
-void buildNewSet(BbMsg * pset, struct iovec * piov, int * piovcnt) {
+void buildNewSet(BbMsg * pSet, struct iovec * iov, int * piovcnt) {
 
-    BbMsg * newSet;
-    struct iovec iov[MAX_MEMB];
     int iovcnt = 0;
     int senderBatchToAdd = 0;
-    int i;
     int nbBatchesToAdd = ((1 << bbSingleton.currentStep) < bbSingleton.view.cv_nmemb - (1 << bbSingleton.currentStep) ?
                         1 << bbSingleton.currentStep :
                         bbSingleton.view.cv_nmemb - (1 << bbSingleton.currentStep));
     
-    newSet = malloc(sizeof(BbMsg));
-    newSet->type = BB_MSG_SET;
-    newSet->body.set.viewId = bbSingleton.viewId;
-    newSet->body.set.wave = bbSingleton.currentWave;
-    newSet->body.set.step = bbSingleton.currentStep;
+    pSet->type = BB_MSG_SET;
+    pSet->body.set.viewId = bbSingleton.viewId;
+    pSet->body.set.wave = bbSingleton.currentWave;
+    pSet->body.set.step = bbSingleton.currentStep;
     
-    iov[iovcnt].iov_base = &newSet;
+    iov[iovcnt].iov_base = pSet;
     iov[iovcnt].iov_len = offsetof(BbSharedMsg, msg.body.set.batches);
-    newSet->len = iov[iovcnt].iov_len;
+    pSet->len = iov[iovcnt].iov_len;
 
     iovcnt++;
     
-    int rank;
+    int i;
     for(i=0, senderBatchToAdd; i < nbBatchesToAdd ; i++, senderBatchToAdd = bbAddrPrec(senderBatchToAdd)) {
-        rank = addrToRank(senderBatchToAdd);
+        int rank = addrToRank(senderBatchToAdd);
         if(rcvdBatch[rank][bbSingleton.currentWave] != NULL) {
             iov[iovcnt].iov_base = rcvdBatch[rank][bbSingleton.currentWave];
             iov[iovcnt].iov_len = rcvdBatch[rank][bbSingleton.currentWave]->batch->len;
-            newSet->len += iov[iovcnt].iov_len;
+            pSet->len += iov[iovcnt].iov_len;
             iovcnt++;
         }
     }
 
-    pset = newSet;
-    piov = iov;
     *piovcnt = iovcnt;
 }
 

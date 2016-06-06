@@ -19,7 +19,5 @@
 
 extern sem_t *bbSem_init_done;
 
-int bbInit();
-
 #endif /* BBINTERFACE_H */
 

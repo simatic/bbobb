@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include "comm.h"
 #include "bqueue.h"
+#include "trains.h"
+#include "bbobb.h"
 #include "bbMsg.h"
 #include "bbStateMachine.h"
 #include "applicationMessage.h"
@@ -64,7 +66,7 @@ extern BbBatchInSharedMsg* rcvdBatch[MAX_MEMB][WAVE_MAX];//[sizeview][maxwave] T
  * @brief initialisation of @a Singleton
  * @return a pointer on @a BbSingleton
  */
-int bbSingletonInit();
+int bbSingletonInit(CallbackCircuitChange callbackCircuitChange, CallbackODeliver callbackODeliver, BbOrder reqOrder);
 
 #endif /* BBSINGLETON_H */
 

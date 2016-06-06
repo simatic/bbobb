@@ -30,11 +30,11 @@ int bbErrno;
     return 0;
 }*/
 
-int bbInit(){
+int bbInit(CallbackCircuitChange callbackCircuitChange, CallbackODeliver callbackODeliver, BbOrder reqOrder){
     
     bbErrno = 0;
     
-    if(bbSingletonInit()) {
+    if(bbSingletonInit(callbackCircuitChange, callbackODeliver, reqOrder)) {
         bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
                                     __FILE__,
                                     __LINE__,

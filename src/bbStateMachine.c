@@ -13,22 +13,18 @@
 
 // fonctions à faire: sizeview, newview
 //A ajouter = remplir waiting set, queue, etc
-
-
-//BbBatchInSharedMsg* rcvdBatch[MAX_MEMB][waveMax];//[MAX_MEMB][maxwave]
+static unsigned char waveMax;
+BbBatchInSharedMsg* rcvdBatch[MAX_MEMB][WAVE_MAX];
 static int nbRecoverRcvd; 
 static bool rcvdSet[MAX_MEMB][WAVE_MAX];
-static trList *waitingSharedMsg;
-static unsigned char waveMax = 255;
-
-//BbState bbAutomatonState;
+static trList *waitingSharedSets = NULL;
+BbState bbAutomatonState;
 //int addrToIndex();
 
 
 //TEMP
 //BbBatchInSharedMsg* getBatchInSharedMsg(BbSharedMsg *sharedMsg, BbBatchInSharedMsg * lastReturnedBatch, int rankSet);
 //static circuitView newView();
-
 
 BbState bbError(BbState, BbSharedMsg*);
 BbState bbProcessRecover(BbState, BbSharedMsg*);
@@ -43,9 +39,12 @@ BbStateMachineFunc bbTransitions[BB_LAST_STATE+1][BB_LAST_MSG+1] = {
   /* BB_STATE_VIEW_CHANGE        */ { bbProcessRecover,          bbSaveSet,                 bbProcessViewChange }
 };
 
+void forceDeliver();
+void sendBatchForStep0();
+
 int bbAutomatonInit(){
     int i,j, error = 0;
-    waitingSharedMsg = newList();
+    waitingSharedSets = newList();
     for (i = 0; i<MAX_MEMB; i++) {
         for (j = 0; j < waveMax; j++) {
             rcvdBatch[i][j] = NULL;
@@ -73,6 +72,7 @@ int bbAutomatonInit(){
                     "bbAutomatonStateInit error waitCommForAcceptThread");
     }
     
+    waitingSharedSets = newList();
     
     printf("AutomatonInit : OK\n");
         
@@ -176,11 +176,11 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pSharedMsg) {//A CHANGER?
             waveMax = pSet->wave;
         }
         if (nbRecoverRcvd == bbSingleton.view.cv_nmemb) {
-            //forceDeliver()
-            //sendBatchForStep0()
-            BbSharedMsg *pSharedMsg;
+            forceDeliver();
+            sendBatchForStep0();
+
             if (nbRecoverRcvd == 1) {
-                if ((pSharedMsg = (BbSharedMsg*) listRemoveFirst(waitingSharedMsg)) != NULL) {
+                if ((pSharedMsg = (BbSharedMsg*) listRemoveFirst(waitingSharedSets)) != NULL) {
                     bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
 			       __FILE__,
 			       __LINE__,
@@ -189,7 +189,7 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pSharedMsg) {//A CHANGER?
                 return BB_STATE_ALONE;
             }
             bbSingleton.automatonState = BB_STATE_SEVERAL;
-            while ((pSharedMsg = (BbSharedMsg*) listRemoveFirst(waitingSharedMsg)) != NULL) {
+            while ((pSharedMsg = (BbSharedMsg*) listRemoveFirst(waitingSharedSets)) != NULL) {
                 bbStateMachineTransition(pSharedMsg);
             }
             return BB_STATE_SEVERAL;
@@ -199,18 +199,93 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pSharedMsg) {//A CHANGER?
     return BB_STATE_VIEW_CHANGE;
 }
 
+int rankIthAfterMe(int ithAfterMe) {
+    int myRank;
+    for (myRank = 0 ; addrIsMine(bbSingleton.view.cv_members[myRank]) ; myRank++) {
+    }
+    return addrToRank(bbSingleton.view.cv_members[(myRank+ithAfterMe)%bbSingleton.view.cv_nmemb]);
+}
+
+void bbProcessPendingSets() {
+     
+    int i;
+
+    while (rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep-1] && 1<<bbSingleton.currentStep <= bbSingleton.view.cv_nmemb){
+        BbMsg newSet;
+        struct iovec iov[MAX_MEMB];
+        int iovcnt = 0;
+        int rc;
+
+        buildNewSet(&newSet, iov, &iovcnt);
+        rc = commWritev(
+                bbSingleton.commToViewMembers[rankIthAfterMe(1<<bbSingleton.currentStep)],
+                iov,
+                iovcnt);
+        if (rc != newSet.len) {
+            bbErrorAtLine(EXIT_FAILURE,
+                          errno,
+                          __FILE__,
+                          __LINE__,
+                          "error on write to a successor",
+                          1<<bbSingleton.currentStep);
+        }
+        bbSingleton.currentStep++;
+     }
+    if(1<<bbSingleton.currentStep <= bbSingleton.view.cv_nmemb){
+        if (bbSingleton.reqOrder == BB_TOTAL_ORDER){
+            for (i = 0; i < MAX_MEMB; i++) {
+                if (rcvdBatch[i][bbSingleton.currentWave] != NULL){
+                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[i][bbSingleton.currentWave]);
+                }
+            }
+        }        
+        else if (bbSingleton.reqOrder == BB_UNIFORM_TOTAL_ORDER){
+            for (i = 0; i < MAX_MEMB; i++) {
+                if (rcvdBatch[i][bbSingleton.currentWave-1] != NULL){ 
+                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[i][bbSingleton.currentWave-1]);
+                }
+            }
+        }
+        for (i = 0; i < MAX_MEMB; i++) {
+            rcvdBatch[i][bbSingleton.currentWave-1] = NULL;            
+        }
+/**
+59:       for each key in rcvdBatch[wave-1].keys() do
+60:           free(rcvdBatch[wave-1].get(key)) 
+61: 	 rcvdBatch[wave-1].remove(key)*/
+
+        //delivBatch = [];
+        bbSingleton.currentWave ++;
+        sendBatchForStep0();
+        bbProcessPendingSets();
+    }
+
+}
+
 BbState bbProcessSet(BbState state, BbSharedMsg* pSharedMsg) {
-    //set de données à traiter
-    //a placer dans une queue
-    //creer tableau de double pointeur
-    return BB_STATE_ALONE; // TODO : Put the correct return value
+/*     Algorithm 2
+ 6:    rcvdSet[set.wave,set.step] = true
+ 7:    foreach batch in set.batches do
+ 8:       rcvdBatch[set.wave].put(batch.sender,batch)
+
+13:    end for
+14:    processPendingSets()*/
+    BbBatchInSharedMsg* pBatch = NULL;
+    rcvdSet[pSharedMsg->msg.body.set.wave][pSharedMsg->msg.body.set.step] = true;
+    for (   pBatch = getBatchInSharedMsg(pSharedMsg, pBatch, 1) ;
+            pBatch != NULL ;
+            pBatch = getBatchInSharedMsg(pSharedMsg, pBatch, 1)   ) {
+        rcvdBatch[pSharedMsg->msg.body.set.wave][pBatch->batch->sender] = pBatch;
+    }
+    bbProcessPendingSets();
+    return state;
 }
 
 BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
 
     nbRecoverRcvd = 0;
-    cleanList(waitingSharedMsg);
-    //bbSingleton.view = newView(); // TODO a definir le calcul de la nouvelle vue
+    cleanList(waitingSharedSets);
+    bbSingleton.view = pSharedMsg->msg.body.recover.view;
     if (bbSingleton.initDone) {
         bbSingleton.viewId += 1;
     } else {
@@ -233,11 +308,13 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
     return BB_STATE_VIEW_CHANGE;
 }
 
+
 BbState bbSaveSet(BbState state, BbSharedMsg* pSharedMsg) {
     if (pSharedMsg->msg.body.set.viewId == bbSingleton.viewId || !(bbSingleton.initDone)) {
-        listAppend(waitingSharedMsg, (void *) pSharedMsg);
+        listAppend(waitingSharedSets, (void *) pSharedMsg);
+
     }
-    return state; // TODO : Put the correct return value
+    return state;
 }
 
 void forceDeliver() {
@@ -279,7 +356,7 @@ void forceDeliver() {
     }
 
     for (i = 0; i<MAX_MEMB; i++) {
-        for (j = 0; j < waveMax; j++) {
+        for (j = 0; j < WAVE_MAX; j++) {
             rcvdBatch[i][j] = NULL;
                     rcvdSet[i][j] = false;
         }
@@ -290,8 +367,7 @@ void forceDeliver() {
         bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
                 __FILE__,
                 __LINE__,
-                "forceDeliver problem\n",
-                __func__);
+                "forceDeliver problem\n");
 
     }
 
@@ -323,4 +399,5 @@ void sendBatchForStep0(){
     deleteBbSharedMsg(sharedSet);
 
     bbSingleton.currentStep++;
+
 }

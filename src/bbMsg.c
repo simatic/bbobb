@@ -50,7 +50,7 @@ BbMsg * createSet(int waveNum) {
         }
     }
     
-    lenOfSet = offsetof(BbSharedMsg, msg.body.set.batches) + lenOfBatches;
+    lenOfSet = offsetof(BbMsg, body.set.batches) + lenOfBatches;
     set = malloc(lenOfSet);
     
     //We fill the fields of set
@@ -87,26 +87,8 @@ message *nextMsgInBatch(BbBatch *b, message *mp){
     return mp2;
 }
 
-address bbAddrPrec(address ad) {
-    int i = 0;
-    for(i=0; addrIsEqual(ad, bbSingleton.view.cv_members[i]) && i < MAX_MEMB + 1; i++) {
-        //find pos of ad in current view
-    }
-    if(i==MAX_MEMB) {
-        bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
-                                   __FILE__,
-                                   __LINE__,
-                                   "error to find address of predecessor, address didn't found");
-    }
-    
-    if(i==0) {
-        return bbSingleton.view.cv_members[bbSingleton.view.cv_nmemb - 1];
-    } else {
-        return bbSingleton.view.cv_members[i - 1];
-    }
-}
-
 void buildNewSet(BbMsg * pset, struct iovec * piov, int * piovcnt) {
+
     BbMsg * newSet;
     struct iovec iov[MAX_MEMB];
     int iovcnt = 0;
@@ -125,6 +107,7 @@ void buildNewSet(BbMsg * pset, struct iovec * piov, int * piovcnt) {
     iov[iovcnt].iov_base = &newSet;
     iov[iovcnt].iov_len = offsetof(BbSharedMsg, msg.body.set.batches);
     newSet->len = iov[iovcnt].iov_len;
+
     iovcnt++;
     
     int rank;
@@ -141,4 +124,23 @@ void buildNewSet(BbMsg * pset, struct iovec * piov, int * piovcnt) {
     pset = newSet;
     piov = iov;
     *piovcnt = iovcnt;
+}
+
+address bbAddrPrec(address ad) {
+    int i = 0;
+    for(i=0; addrIsEqual(ad, bbSingleton.view.cv_members[i]) && i < MAX_MEMB + 1; i++) {
+        //find pos of ad in current view
+    }
+    if(i==MAX_MEMB) {
+        bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+                                   __FILE__,
+                                   __LINE__,
+                                   "error to find address of predecessor, address didn't found");
+    }
+    
+    if(i==0) {
+        return bbSingleton.view.cv_members[bbSingleton.view.cv_nmemb - 1];
+    } else {
+        return bbSingleton.view.cv_members[i - 1];
+    }
 }

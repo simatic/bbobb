@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <pthread.h>
 #include <unistd.h>
-
+#include "bbiomsg.h"
 // VAR STATICS setrecovered[], nbSetRcvd], waitingset
 // VAR EXTERNES view, sizeView, viewId, wavemax
 
@@ -295,7 +295,7 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
     if (bbSingleton.view.cv_nmemb == 1) {
         if (bbSingleton.initDone) {
             waveMax = bbSingleton.currentWave;
-            //forceDeliver();
+            forceDeliver();
         } else {
             bbSingleton.initDone = true;
         }
@@ -303,7 +303,7 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
     else {
         waveMax = bbSingleton.currentWave;
         nbRecoverRcvd = 0;
-        //APPEL TO-Broadcast(RECOVER,
+        tOBroadcast_RECOVER();
 
     }
     return BB_STATE_VIEW_CHANGE;
@@ -329,14 +329,14 @@ void forceDeliver() {
             for (i = 0; i < MAX_MEMB; i++) {//foreach key in rcvdBatch[wave-1].keys() do
                 if (rcvdBatch[i][bbSingleton.currentWave - 1] != NULL){ // TODO : METTRE A NULL
                         //O-deliver(rcvdBatch[wave-1].get(key).msgs)
-                        printf("odeliver");
+                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[i][bbSingleton.currentWave-1]);
                     }
             }
         }
         for (i = 0; i < MAX_MEMB; i++) {
             if (rcvdBatch[i][bbSingleton.currentWave] != NULL){ // TODO : METTRE A NULL
                     //O-deliver(rcvdBatch[wave].get(key).msgs)
-                    printf("odeliver");
+                bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[i][bbSingleton.currentWave]);
                 }
         }
         //foreach key in rcvdBatch[wave].keys() do
@@ -349,7 +349,7 @@ void forceDeliver() {
             for (i = 0; i < MAX_MEMB; i++) {
                 if (rcvdBatch[i][bbSingleton.currentWave] != NULL){ // TODO : METTRE A NULL
                         //O-deliver(rcvdBatch[waveMax].get(key).msgs) -> bqueueEnqueue
-                        printf("odeliver");
+                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[i][bbSingleton.currentWave]);
                     }
 
             }
@@ -389,13 +389,30 @@ void sendBatchForStep0(){
     bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(bbSingleton.batchMaxLen);//modif
     MUTEX_LOCK(bbSingleton.batchToSendMutex);
     pthread_cond_signal(&(bbSingleton.batchToSendCond));
-
+/*
     sharedSet->msg.body.set.viewId = bbSingleton.viewId;
     sharedSet->msg.body.set.wave = bbSingleton.currentWave;
     sharedSet->msg.body.set.step = bbSingleton.currentStep;
-
+*/
     // commWrite(leCommCorrespondantAuDestinataire, &(sharedSet->msg.body.set), sharedSet->msg.len);
     // Evidemment, il faut tester le code retour de commWritev
+        struct iovec iov[MAX_MEMB];
+        int iovcnt = 0;
+        int rc;
+
+        buildNewSet(&(sharedSet->msg.body.set), iov, &iovcnt);
+        rc = commWritev(
+                bbSingleton.commToViewMembers[rankIthAfterMe(1<<bbSingleton.currentStep)],
+                iov,
+                iovcnt);
+        if (rc != sharedSet->msg.len) {
+            bbErrorAtLine(EXIT_FAILURE,
+                          errno,
+                          __FILE__,
+                          __LINE__,
+                          "error on write to a successor",
+                          1<<bbSingleton.currentStep);
+        }
 
     deleteBbSharedMsg(sharedSet);
 

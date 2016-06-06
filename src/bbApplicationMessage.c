@@ -12,6 +12,7 @@
 #include "bbSingleton.h"
 #include "bbStateMachine.h"
 #include "bbMsg.h"
+#include "bbSharedMsg.h"
 
 message *bbNewmsg(int payloadSize) {
     message *mp;

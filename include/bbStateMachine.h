@@ -12,6 +12,7 @@
 #include "bbMsg.h"
 #include "bqueue.h"
 #include "comm.h"
+#include "bbSharedMsg.h"
 
 /**
 * @brief Data structure for BbState
@@ -31,16 +32,18 @@ typedef enum {
 
 #define BB_LAST_STATE BB_STATE_VIEW_CHANGE
 
+#define WAVE_MAX 255
+
 /** 
  * @brief Type of function used to code transitions in state machine
  */
-typedef  BbState (*BbStateMachineFunc)(BbState, BbMsg*);
+typedef  BbState (*BbStateMachineFunc)(BbState, BbSharedMsg*);
 
 /** 
  * @brief Execute a transition of state machine based on @a pMsg
  * @param[in] pMsg Message to be processed by state machine
  */
-void bbStateMachineTransition(BbMsg* pMsg);
+void bbStateMachineTransition(BbSharedMsg* pSharedMsg);
 
 /*
  * @brief initializes the automaton with default parameters and star usefull threads
@@ -50,6 +53,6 @@ int bbAutomatonInit();
 /*
  * @brief thread to treat msg in queue with fifo order
  */
-void * bbMsgTreatement(void);
+void * bbMsgTreatement(void* unused);
 
 #endif /* _BB_STATE_MACHINE_H */

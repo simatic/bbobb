@@ -10,8 +10,8 @@
 #define _BB_SHARED_MSG_H
 
 #include <pthread.h>
-#include "bbMsg.h"
 #include "address.h"
+#include "bbMsg.h"
 
 /*
  * @brief Structure used to control how many pointers point on a BbMsg

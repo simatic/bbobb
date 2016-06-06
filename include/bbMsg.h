@@ -8,6 +8,7 @@
 #ifndef _BB_MSG_H
 #define _BB_MSG_H
 
+#include <sys/uio.h>
 #include "address.h"
 #include "applicationMessage.h"
 #include "advanced_struct.h"
@@ -53,7 +54,7 @@ typedef struct {
 */
 typedef struct {
   address       sender;   /**< Sender of message */
-  unsigned int  viewId;   /** View Id */
+  unsigned char  viewId;   /** View Id */
   circuitView   view;     /**< View at the moment the message was sent */
   bool          initDone; /**< Value of initDone at the moment the message was sent */
   unsigned char nbSets;   /**< Number of sets which are sent in this message */
@@ -95,5 +96,15 @@ message *firstMsgInBatch(BbBatch *b);
  * @return A pointer on a next message or NULL if @a b contains no other messages
  */
 message *nextMsgInBatch(BbBatch *w, message *mp);
+
+/**
+ * @brief create a BbMsg with all batches in rcvdBatch
+ * @brief function uses in tOBroadcastRecover
+ * @param[in] waveNum of wave in which to take batches
+ * @return a BbMsg set which contains all rcvdBatches of waveNum
+ */
+BbMsg * createSet(int waveNum);
+
+void buildNewSet(BbMsg * pset, struct iovec * piov, int * piovcnt);
 
 #endif /* _BB_MSG_H */

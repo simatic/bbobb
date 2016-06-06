@@ -7,12 +7,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/uio.h>
 #include <stddef.h>
 #include "bbMsg.h"
 #include "address.h"
 #include "bbSingleton.h"
 #include "bbStateMachine.h"
+#include "bbError.h"
+#include "bbSharedMsg.h"
 
 /*
 BbBatch initBatch () {
@@ -34,6 +35,7 @@ BbBatch newBbBatch (address sender, message messages[]) {
     return batch;
 }
 */
+address bbAddrPrec(address ad);
 
 BbMsg * createSet(int waveNum) {
     BbMsg * set = NULL;
@@ -48,7 +50,7 @@ BbMsg * createSet(int waveNum) {
         }
     }
     
-    lenOfSet = offsetof(BbMsg, body.set.batches) + lenOfBatches;
+    lenOfSet = offsetof(BbSharedMsg, msg.body.set.batches) + lenOfBatches;
     set = malloc(lenOfSet);
     
     //We fill the fields of set
@@ -70,38 +72,6 @@ BbMsg * createSet(int waveNum) {
     return set;
 }
 
-void buildNewSet() {
-    BbMsg newSet;
-    struct iovec iov[MAX_MEMB];
-    int iovcnt = 0;
-    int senderBatchToAdd = 0;
-    int i;
-    int nbSetToAdd = (2^bbSingleton.currentStep < bbSingleton.view.cv_nmemb - 2^bbSingleton.currentStep ?
-                        2^bbSingleton.currentStep :
-                        bbSingleton.view.cv_nmemb - 2^bbSingleton.currentStep);
-    
-    newSet.type = BB_MSG_SET;
-    newSet.body.set.viewId = bbSingleton.viewId;
-    newSet.body.set.wave = bbSingleton.currentWave;
-    newSet.body.set.step = bbSingleton.currentStep;
-    
-    iov[iovcnt].iov_base = &newSet;
-    iov[iovcnt].iov_len = offsetof(BbMsg, body.set.batches);
-    newSet.len = iov[iovcnt].iov_len;
-    iovcnt++;
-    
-    for(i=0, senderBatchToAdd; i < nbSetToAdd ; i++, senderBatchToAdd = addrPrec(senderBatchToAdd, bbSingleton.view)) { //TO DO : pred in view
-    //TO DO :ask for addreToIndex
-        int rank = addrToRank(senderBatchToAdd);
-        if(rcvdBatch[rank][bbSingleton.currentWave] != NULL) {
-            iov[iovcnt].iov_base = rcvdBatch[rank][bbSingleton.currentWave];
-            iov[iovcnt].iov_len = rcvdBatch[rank][bbSingleton.currentWave]->batch->len;
-            newSet.len += iov[iovcnt].iov_len;
-            iovcnt++;
-        }
-    }
-}
-
 message *firstMsgInBatch(BbBatch *b){
   if (b->len == sizeof(BbBatch))
     return NULL;
@@ -115,4 +85,60 @@ message *nextMsgInBatch(BbBatch *b, message *mp){
     return NULL;
   else
     return mp2;
+}
+
+address bbAddrPrec(address ad) {
+    int i = 0;
+    for(i=0; addrIsEqual(ad, bbSingleton.view.cv_members[i]) && i < MAX_MEMB + 1; i++) {
+        //find pos of ad in current view
+    }
+    if(i==MAX_MEMB) {
+        bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+                                   __FILE__,
+                                   __LINE__,
+                                   "error to find address of predecessor, address didn't found");
+    }
+    
+    if(i==0) {
+        return bbSingleton.view.cv_members[bbSingleton.view.cv_nmemb - 1];
+    } else {
+        return bbSingleton.view.cv_members[i - 1];
+    }
+}
+
+void buildNewSet(BbMsg * pset, struct iovec * piov, int * piovcnt) {
+    BbMsg * newSet;
+    struct iovec iov[MAX_MEMB];
+    int iovcnt = 0;
+    int senderBatchToAdd = 0;
+    int i;
+    int nbBatchesToAdd = ((1 << bbSingleton.currentStep) < bbSingleton.view.cv_nmemb - (1 << bbSingleton.currentStep) ?
+                        1 << bbSingleton.currentStep :
+                        bbSingleton.view.cv_nmemb - (1 << bbSingleton.currentStep));
+    
+    newSet = malloc(sizeof(BbMsg));
+    newSet->type = BB_MSG_SET;
+    newSet->body.set.viewId = bbSingleton.viewId;
+    newSet->body.set.wave = bbSingleton.currentWave;
+    newSet->body.set.step = bbSingleton.currentStep;
+    
+    iov[iovcnt].iov_base = &newSet;
+    iov[iovcnt].iov_len = offsetof(BbSharedMsg, msg.body.set.batches);
+    newSet->len = iov[iovcnt].iov_len;
+    iovcnt++;
+    
+    int rank;
+    for(i=0, senderBatchToAdd; i < nbBatchesToAdd ; i++, senderBatchToAdd = bbAddrPrec(senderBatchToAdd)) {
+        rank = addrToRank(senderBatchToAdd);
+        if(rcvdBatch[rank][bbSingleton.currentWave] != NULL) {
+            iov[iovcnt].iov_base = rcvdBatch[rank][bbSingleton.currentWave];
+            iov[iovcnt].iov_len = rcvdBatch[rank][bbSingleton.currentWave]->batch->len;
+            newSet->len += iov[iovcnt].iov_len;
+            iovcnt++;
+        }
+    }
+
+    pset = newSet;
+    piov = iov;
+    *piovcnt = iovcnt;
 }

@@ -23,7 +23,7 @@ void callbackCircuitChange(circuitView *pcv);
 /** 
  * @brief Callback function called by Trains middleware when it wants to o-deliver a message to BBOBB
  */
-void CallBackODeliver(address sender, t_typ messageType, message * mp);
+void callbackODeliver(address sender, t_typ messageType, message * mp);
 
 
 

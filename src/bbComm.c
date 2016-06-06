@@ -28,25 +28,27 @@
 void * waitCommForAccept(void *unused){
 
     printf("ConnectionWait : OK\n");
-    
+
     do{
-        bbReceive(bbSingleton.commForAccept);
-        pthread_t connectionMgtThread;
-        pthread_create(&connectionMgtThread, NULL, bbConnectionMgt, NULL);
-        pthread_detach(connectionMgtThread);
+        trComm *aComm = commAccept(bbSingleton.commForAccept);
+        pthread_t thread;
+        pthread_create(&thread, NULL, bbConnectionMgt, (void*)aComm);
+        pthread_detach(thread);            
     }while(1);
 }
 
-void * bbConnectionMgt(void *unused){    
-    BbSharedMsg * aMsg /*= newBbSharedMsg(sizeof(BbMsg))*/;
-
-    //trComm * rcvdComm = commAlloc(fd);
+void * bbConnectionMgt(void *arg){    
+    BbSharedMsg * aMsg ;
+    trComm * myComm = (trComm*)arg;
     printf("ConnectionMgt : OK\n");
     
     do{
-        //aMsg = receive(singleton->commForAccept);
-        bqueueEnqueue(bbSingleton.msgQueue, &aMsg);
-    }while(1); 
+        aMsg = (BbSharedMsg*)bbReceive(myComm);
+        if(aMsg != NULL) {
+            bqueueEnqueue(bbSingleton.msgQueue, &aMsg);
+        }
+    }while(aMsg != NULL);
+    return NULL;
 }
 
 char *bbGetLocalPort(){

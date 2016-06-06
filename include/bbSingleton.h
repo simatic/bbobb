@@ -60,8 +60,6 @@ typedef struct {
 
 extern BbSingleton bbSingleton;
 
-extern BbBatchInSharedMsg* rcvdBatch[MAX_MEMB][WAVE_MAX];//[sizeview][maxwave] TO DO : refactor to BbBatchInSharedMsg
-
 /*
  * @brief initialisation of @a Singleton
  * @return a pointer on @a BbSingleton

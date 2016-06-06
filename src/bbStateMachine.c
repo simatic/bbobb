@@ -14,7 +14,7 @@
 // fonctions à faire: sizeview, newview
 //A ajouter = remplir waiting set, queue, etc
 static unsigned char waveMax;
-BbBatchInSharedMsg* rcvdBatch[MAX_MEMB][WAVE_MAX];
+static BbBatchInSharedMsg* rcvdBatch[MAX_MEMB][WAVE_MAX];
 static int nbRecoverRcvd; 
 static bool rcvdSet[MAX_MEMB][WAVE_MAX];
 static trList *waitingSharedSets = NULL;
@@ -82,6 +82,7 @@ int bbAutomatonInit(){
 void * bbMsgTreatement(void* unused){
 
     BbSharedMsg * sharedMsg = NULL;
+    printf("MsgTreatementThread : OK\n");
     do {
         sharedMsg = (BbSharedMsg*)bqueueDequeue(bbSingleton.msgQueue);
         

@@ -22,23 +22,31 @@
 
 sem_t *bbSem_init_done;
 
-int bbErrno;
-
 /*int main(int argc, char* argv[]){
     bbInit();
     
     return 0;
 }*/
 
-int bbInit(CallbackCircuitChange callbackCircuitChange, CallbackODeliver callbackODeliver, BbOrder reqOrder){
+int bbInit(int batchMaxLen, int waitNb, int waitTime, CallbackCircuitChange callbackCircuitChange, CallbackODeliver callbackODeliver, BbOrder reqOrder){
     
     bbErrno = 0;
     
-    if(bbSingletonInit(callbackCircuitChange, callbackODeliver, reqOrder)) {
+    bbErrno = bbSingletonInit(callbackCircuitChange, callbackODeliver, reqOrder);
+    if(bbErrno) {
         bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
                                     __FILE__,
                                     __LINE__,
                                     "bbAutomatonStateInit error with singletonInit");
+    }
+    
+    pthread_t OdeliveriesThread;
+    bbErrno = pthread_create(&OdeliveriesThread, NULL, oDeliveries, NULL);
+    if(bbErrno) {
+        bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
+                                   __FILE__,
+                                   __LINE__,
+                                   "bbODeliveries, error with oDeliveries threadInit");
     }
    
     bbErrno=bbAutomatonInit();

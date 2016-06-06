@@ -14,6 +14,7 @@
 #ifndef BBOBB_H
 #define BBOBB_H
 
+#include "trains.h"
 #include "bbApplicationMessage.h"
 
 typedef enum {

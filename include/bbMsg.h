@@ -97,14 +97,6 @@ message *firstMsgInBatch(BbBatch *b);
  */
 message *nextMsgInBatch(BbBatch *w, message *mp);
 
-/**
- * @brief create a BbMsg with all batches in rcvdBatch
- * @brief function uses in tOBroadcastRecover
- * @param[in] waveNum of wave in which to take batches
- * @return a BbMsg set which contains all rcvdBatches of waveNum
- */
-BbMsg * createSet(int waveNum);
-
 void buildNewSet(BbMsg * pset, struct iovec * piov, int * piovcnt);
 
 #endif /* _BB_MSG_H */

@@ -32,6 +32,11 @@
         <in>bbiomsg.c</in>
       </df>
       <df name="Test">
+        <df name="integration">
+          <df name="basic">
+            <in>basicTest.c</in>
+          </df>
+        </df>
         <df name="serverTest">
           <df name="client">
             <in>client.c</in>

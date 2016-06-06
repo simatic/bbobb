@@ -27,7 +27,8 @@ int bbSingletonInit(CallbackCircuitChange callbackCircuitChange, CallbackODelive
     bbSingleton.callbackCircuitChange = callbackCircuitChange;
     bbSingleton.callbackODeliver = callbackODeliver;
     bbSingleton.reqOrder = reqOrder;
-
+    bbSingleton.batchMaxLen = 1024;
+    
     bbSingleton.initDone = false;
     
     char * port = bbGetLocalPort();

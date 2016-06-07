@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "bbiomsg.h"
+#include "bbSignalArrival.h"
 // VAR STATICS setrecovered[], nbSetRcvd], waitingset
 // VAR EXTERNES view, sizeView, viewId, wavemax
 
@@ -300,15 +301,42 @@ BbState bbProcessSet(BbState state, BbSharedMsg* pSharedMsg) {
 }
 
 BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
-
+    // Miscellaneous initializations
     nbRecoverRcvd = 0;
     cleanList(waitingSharedSets);
-    // Already done in bbCallbackCircuitChange : bbSingleton.view = pSharedMsg->msg.body.recover.view;
     if (bbSingleton.initDone) {
         bbSingleton.viewId += 1;
     } else {
         bbSingleton.viewId = 0;
     }
+
+    // We take into account the new view
+    bbSingleton.view = pSharedMsg->msg.body.viewChange.view;
+    connectToViewMembers(&(bbSingleton.view));
+
+    // We build a message for the application layer
+    if (addrIsNull(bbSingleton.view.cv_joined)) {
+        // A process is gone
+        if (addrIsMine(bbSingleton.view.cv_members[0])) {
+            // As current process is first member, it is responsible to 
+            // bbOBroadcast this departure information
+            bbSignalArrivalDepartures(AM_DEPARTURE, &(bbSingleton.view));
+        }        
+    } else {
+        // A process has arrived
+        if (addrIsMine(bbSingleton.view.cv_joined)){
+            // As current process is the joining process, it is responsible to 
+            // bbOBroadcast this arrival information
+            // If it was another process which bbOBroadcast this arrival
+            // information, there would be a risk that this information is
+            // stored in a batch which is transmitted thanks to RECOVER
+            // messages, thus not seen by our starting process (as initDone
+            // might still be false)
+            bbSignalArrivalDepartures(AM_ARRIVAL, &(bbSingleton.view));
+        }
+    }
+
+    // Rest of processing depends if we are alone or  not
     if (bbSingleton.view.cv_nmemb == 1) {
         if (bbSingleton.initDone) {
             waveMax = bbSingleton.currentWave;

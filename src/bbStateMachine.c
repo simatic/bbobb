@@ -312,8 +312,9 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
 
     // We take into account the new view
     bbSingleton.view = pSharedMsg->msg.body.viewChange.view;
+    printf("bbSingleton : %d \n",bbSingleton.view.cv_nmemb);
     connectToViewMembers(&(bbSingleton.view));
-
+    printf("bbSingleton : %d \n",bbSingleton.view.cv_nmemb);
     // We build a message for the application layer
     if (addrIsNull(bbSingleton.view.cv_joined)) {
         // A process is gone
@@ -338,6 +339,7 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
 
     // Rest of processing depends if we are alone or  not
     if (bbSingleton.view.cv_nmemb == 1) {
+
         if (bbSingleton.initDone) {
             waveMax = bbSingleton.currentWave;
             forceDeliver();
@@ -358,7 +360,9 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
     else {
         waveMax = bbSingleton.currentWave;
         nbRecoverRcvd = 0;
+        printf("recover ... \n");
         tOBroadcast_RECOVER();
+        printf("...snet \n");
         return BB_STATE_VIEW_CHANGE;
     }
 }

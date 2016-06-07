@@ -343,6 +343,7 @@ void forceDeliver() {
         //si causal order -> suprrimer
         //if req_order != CAUSAL_ORDER or (reqOrder == CAUSAL_ORDER and delivBatch.get(key) != true) then
         //O-deliver(rcvdBatch[wave].get(key).msgs) A FAIRE TOUT LE TEMPS
+        bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[i][bbSingleton.currentWave]);
         if (bbSingleton.currentWave < waveMax) {
 
             //foreach key in rcvdBatch[waveMax].keys() do

@@ -358,6 +358,7 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
     else {
         waveMax = bbSingleton.currentWave;
         nbRecoverRcvd = 0;
+        printf("ici ça marche\n");
         tOBroadcast_RECOVER();
         return BB_STATE_VIEW_CHANGE;
     }
@@ -488,7 +489,8 @@ address bbAddrPrec(address ad) {
     }
 }
 
-BbMsg * createSet(int waveNum) {
+BbMsg * createSet(unsigned char waveNum) {
+    
     BbMsg * set = NULL;
     
     int lenOfSet;
@@ -496,8 +498,8 @@ BbMsg * createSet(int waveNum) {
     int processIndex;
     
     for(processIndex=0; processIndex<MAX_MEMB; processIndex++) {
-        if(rcvdBatch[waveNum][processIndex] != NULL) {
-            lenOfBatches += rcvdBatch[waveNum][processIndex]->batch->len;
+        if(rcvdBatch[processIndex][waveNum] != NULL) {
+            lenOfBatches += rcvdBatch[processIndex][waveNum]->batch->len;
         }
     }
     
@@ -514,9 +516,9 @@ BbMsg * createSet(int waveNum) {
     //We fill the batches of the set
     lenOfBatches = 0;
     for(processIndex=0; processIndex<MAX_MEMB; processIndex++) {
-        if(rcvdBatch[waveNum][processIndex] != NULL) {
-            memcpy((char*)&(set->body.set.batches)+lenOfBatches, rcvdBatch[waveNum][processIndex], rcvdBatch[waveNum][processIndex]->batch->len);
-            lenOfBatches += rcvdBatch[waveNum][processIndex]->batch->len;
+        if(rcvdBatch[processIndex][waveNum] != NULL) {
+            memcpy((char*)&(set->body.set.batches)+lenOfBatches, rcvdBatch[processIndex][waveNum], rcvdBatch[processIndex][waveNum]->batch->len);
+            lenOfBatches += rcvdBatch[processIndex][waveNum]->batch->len;
         }
     }
     

@@ -62,6 +62,8 @@ void tOBroadcast_RECOVER() {
         sset = createSet(bbSingleton.currentWave);
     }
     
+    printf("set created\n");
+    
     int len = offsetof(BbMsg, body.recover.sets) + (bbSingleton.initDone ? fset->len + sset->len : 0);
     message *mp = newmsg(len);
     

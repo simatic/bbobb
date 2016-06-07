@@ -106,11 +106,12 @@ BbBatchInSharedMsg* getBatchInSharedMsg(BbSharedMsg *sharedMsg, BbBatchInSharedM
         }
         
         /*now offset is on set in wave*/
-        offset += 3*sizeof(char) + sizeof(int);
+        offset += offsetof(BbSetInRecover, set.batches);
         /*now offset is on first batch in set*/
         if(lastReturnedBatch == NULL) {
             return newBatchInSharedMsg((BbBatch*)offset, sharedMsg);
         }
+        printf("ou qu'il est : %ld et %d\n", (char*)lastReturnedBatch - (char*)set, set->len);
         if( (char*)lastReturnedBatch - (char*)set <= 0 || (char*)lastReturnedBatch - (char*)set >= set->len ) {
             bbErrorAtLineWithoutErrnum( EXIT_FAILURE,
                                         __FILE__,

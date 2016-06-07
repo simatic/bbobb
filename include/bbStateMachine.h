@@ -26,7 +26,7 @@ typedef enum {
 
 #define BB_LAST_STATE BB_STATE_VIEW_CHANGE
 
-#define WAVE_MAX 255
+#define WAVE_MAX 256
 
 /** 
  * @brief Type of function used to code transitions in state machine
@@ -55,7 +55,7 @@ void * bbMsgTreatement(void* unused);
  * @param[in] waveNum of wave in which to take batches
  * @return a BbMsg set which contains all rcvdBatches of waveNum
  */
-BbMsg * createSet(int waveNum);
+BbMsg * createSet(unsigned char waveNum);
 
 void buildNewSet(BbMsg * pset, struct iovec * piov, int * piovcnt);
 #endif /* _BB_STATE_MACHINE_H */

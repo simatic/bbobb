@@ -49,11 +49,7 @@ message *bbNewmsg(int payloadSize) {
     return mp;
 }
 
-int bbOBroadcast(t_typ messageTyp, message *mp) {
-
-    if (messageTyp < FIRST_VALUE_AVAILABLE_FOR_MESS_TYP) {
-        ERROR_AT_LINE_WITHOUT_ERRNUM(EXIT_FAILURE, __FILE__, __LINE__, "messageType is %d, thus a value which is lower than FIRST_VALUE_AVAILABLE_FOR_MESS_TYP (which is %d)", messageTyp, FIRST_VALUE_AVAILABLE_FOR_MESS_TYP);
-    }
+int bbOBroadcastWithoutMessageTypCheck(t_typ messageTyp, message *mp) {
     mp->header.typ = messageTyp;
 
     if (bbSingleton.automatonState == BB_STATE_ALONE) {
@@ -64,6 +60,14 @@ int bbOBroadcast(t_typ messageTyp, message *mp) {
     // Message is already in batchToSend. All we have to do is to unlock the mutex.
     MUTEX_UNLOCK(bbSingleton.batchToSendMutex);
     return 0;
+}
+
+int bbOBroadcast(t_typ messageTyp, message *mp) {
+
+    if (messageTyp < FIRST_VALUE_AVAILABLE_FOR_MESS_TYP) {
+        ERROR_AT_LINE_WITHOUT_ERRNUM(EXIT_FAILURE, __FILE__, __LINE__, "messageType is %d, thus a value which is lower than FIRST_VALUE_AVAILABLE_FOR_MESS_TYP (which is %d)", messageTyp, FIRST_VALUE_AVAILABLE_FOR_MESS_TYP);
+    }
+    return bbOBroadcastWithoutMessageTypCheck(messageTyp, mp);
 }
 
 void *bbODeliveries(void *null) {

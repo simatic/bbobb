@@ -23,12 +23,20 @@
 message *bbNewmsg(int payloadSize);
 
 /**
- * @brief o-broadcast of message @a mp
+ * @brief o-broadcast of message @a mp (NB : this is the function to be used by application layer)
  * @param[in] messageTyp This parameter is a @a t_typ field greater or equal to @a FIRST_VALUE_AVAILABLE_FOR_MESS_TYP which can be used by the application  arbitrarily. The intent is that it could be used to name different kinds of data messages so they can be differentiated without looking into the body of the message.
  * @param[in] mp Message to be o-broadcasted
  * @return 0 upon successful completion, or -1 if an error occurred (in which case, @a trErrno is set appropriately)
  */
 int bbOBroadcast(t_typ messageTyp, message *mp);
+
+/**
+ * @brief o-broadcast of message @a mp, but does not make any check on @messageTyp (NB : must only be used inside BBOBB layer)
+ * @param[in] messageTyp This parameter is a @a t_typ field greater or equal to @a FIRST_VALUE_AVAILABLE_FOR_MESS_TYP which can be used by the application  arbitrarily. The intent is that it could be used to name different kinds of data messages so they can be differentiated without looking into the body of the message.
+ * @param[in] mp Message to be o-broadcasted
+ * @return 0 upon successful completion, or -1 if an error occurred (in which case, @a trErrno is set appropriately)
+ */
+int bbOBroadcastWithoutMessageTypCheck(t_typ messageTyp, message *mp);
 
 /**
  * @brief Function (to be executed by a thread) responsible for delivering messages stored in

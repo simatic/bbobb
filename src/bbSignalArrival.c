@@ -17,5 +17,5 @@ void bbSignalArrivalDepartures(char typ, circuitView *pcv){
   mp->header.typ = typ;
   *((circuitView*)(mp->payload)) = *pcv;
 
-  bbOBroadcast(typ, mp);
+  bbOBroadcastWithoutMessageTypCheck(typ, mp);
 }

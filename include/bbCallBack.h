@@ -18,12 +18,12 @@
 /** 
  * @brief Callback function called by Trains middleware when there is a change in circuit members
  */
-void callbackCircuitChange(circuitView *pcv);
+void bbCallbackCircuitChange(circuitView *pcv);
 
 /** 
  * @brief Callback function called by Trains middleware when it wants to o-deliver a message to BBOBB
  */
-void callbackODeliver(address sender, t_typ messageType, message * mp);
+void bbCallbackODeliver(address sender, t_typ messageType, message * mp);
 
 
 

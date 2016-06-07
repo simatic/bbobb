@@ -31,11 +31,11 @@ int bbErrno;
     return 0;
 }*/
 
-int bbInit(int batchMaxLen, int waitNb, int waitTime, CallbackCircuitChange callbackCircuitChange, CallbackODeliver callbackODeliver, BbOrder reqOrder){
+int bbInit(int batchMaxLen, int waitNb, int waitTime, CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, BbOrder reqOrder){
     
     bbErrno = 0;
     
-    bbErrno = bbSingletonInit(callbackCircuitChange, callbackODeliver, reqOrder);
+    bbErrno = bbSingletonInit(aCallbackCircuitChange, aCallbackODeliver, reqOrder);
     if(bbErrno) {
         bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
                                     __FILE__,
@@ -44,7 +44,7 @@ int bbInit(int batchMaxLen, int waitNb, int waitTime, CallbackCircuitChange call
     }
     
     pthread_t OdeliveriesThread;
-    bbErrno = pthread_create(&OdeliveriesThread, NULL, oDeliveries, NULL);
+    bbErrno = pthread_create(&OdeliveriesThread, NULL, bbODeliveries, NULL);
     if(bbErrno) {
         bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
                                    __FILE__,
@@ -60,7 +60,7 @@ int bbInit(int batchMaxLen, int waitNb, int waitTime, CallbackCircuitChange call
                                     "bbAutomatonStateInit error with AutomatonInit");        
     }
     
-    bbErrno=trInit(0, 0, 0, 0, callbackCircuitChange, callbackODeliver, UNIFORM_TOTAL_ORDER);
+    bbErrno=trInit(0, 0, 0, 0, bbCallbackCircuitChange, bbCallbackODeliver, UNIFORM_TOTAL_ORDER);
     if(bbErrno){
         bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
                                     __FILE__,

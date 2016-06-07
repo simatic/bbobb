@@ -79,7 +79,7 @@ extern int bbErrno;
  * @param[in] reqOrder Order guarantees which Bbobb algorithm must provide while it is running
  * @return 0 upon successful completion, or -1 if an error occurred (in which case, @a bbErrno is set appropriately)
  */
-int bbInit(int batchMaxLen, int waitNb, int waitTime, CallbackCircuitChange callbackCircuitChange, CallbackODeliver callbackODeliver, BbOrder reqOrder);
+int bbInit(int batchMaxLen, int waitNb, int waitTime, CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, BbOrder reqOrder);
 
 /**
  * @brief function uses to terminate bbobb protocol

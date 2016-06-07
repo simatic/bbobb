@@ -64,7 +64,7 @@ extern BbSingleton bbSingleton;
  * @brief initialisation of @a Singleton
  * @return a pointer on @a BbSingleton
  */
-int bbSingletonInit(CallbackCircuitChange callbackCircuitChange, CallbackODeliver callbackODeliver, BbOrder reqOrder);
+int bbSingletonInit(CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, BbOrder reqOrder);
 
 #endif /* BBSINGLETON_H */
 

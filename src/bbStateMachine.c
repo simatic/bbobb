@@ -39,6 +39,18 @@ BbStateMachineFunc bbTransitions[BB_LAST_STATE+1][BB_LAST_MSG+1] = {
   /* BB_STATE_VIEW_CHANGE        */ { bbProcessRecover,          bbSaveSet,                 bbProcessViewChange }
 };
 
+char *state2str[] = {
+    "BB_STATE_ALONE",
+    "BB_STATE_SEVERAL",
+    "BB_STATE_VIEW_CHANGE"
+};
+
+char *msg2str[]= {
+    "BB_MSG_RECOVER",
+    "BB_MSG_SET",
+    "BB_MSG_VIEW_CHANGE"
+};
+
 void forceDeliver();
 void sendBatchForStep0();
 
@@ -85,7 +97,7 @@ void * bbMsgTreatement(void* unused){
     printf("MsgTreatementThread : OK\n");
     do {
         sharedMsg = (BbSharedMsg*)bqueueDequeue(bbSingleton.msgQueue);
-        
+
         bbStateMachineTransition(sharedMsg);
     }while(1);
 }
@@ -110,7 +122,9 @@ void bbStateMachineTransition(BbSharedMsg* pSharedMsg){
 			       0,
 			       BB_LAST_STATE);
   }
+  printf("In state \"%s\", automaton receives message \"%s\"\n", state2str[bbSingleton.automatonState], msg2str[pSharedMsg->msg.type]);
   bbSingleton.automatonState = (*bbTransitions[bbSingleton.automatonState][pSharedMsg->msg.type])(bbSingleton.automatonState, pSharedMsg);
+  printf("   Next state = \"%s\"\n", state2str[bbSingleton.automatonState]);
 }
 
 BbState bbError(BbState state, BbSharedMsg* pSharedMsg){
@@ -376,44 +390,38 @@ void forceDeliver() {
     bbSingleton.currentWave = waveMax + 1;
 }
 
-void sendBatchForStep0(){
-    bbSingleton.currentStep=0;
+void sendBatchForStep0() {
+    bbSingleton.currentStep = 0;
 
     MUTEX_LOCK(bbSingleton.batchToSendMutex);
     BbSharedMsg *sharedSet = bbSingleton.batchToSend->sharedMsg;
-    if (sharedSet->msg.body.set.batches[0].len > sizeof(BbBatch)) {
+    if (sharedSet->msg.body.set.batches[0].len > sizeof (BbBatch)) {
         rcvdBatch[bbSingleton.currentWave][addrToRank(myAddress)] = newBatchInSharedMsg(sharedSet->msg.body.set.batches, sharedSet);
-        sharedSet->msg.len = offsetof(BbMsg,body.set.batches) + sharedSet->msg.body.set.batches[0].len;
+        sharedSet->msg.len = offsetof(BbMsg, body.set.batches) + sharedSet->msg.body.set.batches[0].len;
     } else {
-        sharedSet->msg.len = offsetof(BbMsg,body.set.batches);
+        sharedSet->msg.len = offsetof(BbMsg, body.set.batches);
     }
-    bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(bbSingleton.batchMaxLen);//modif
+    bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(bbSingleton.batchMaxLen); //modif
     MUTEX_LOCK(bbSingleton.batchToSendMutex);
     pthread_cond_signal(&(bbSingleton.batchToSendCond));
-/*
+
     sharedSet->msg.body.set.viewId = bbSingleton.viewId;
     sharedSet->msg.body.set.wave = bbSingleton.currentWave;
     sharedSet->msg.body.set.step = bbSingleton.currentStep;
-*/
-    // commWrite(leCommCorrespondantAuDestinataire, &(sharedSet->msg.body.set), sharedSet->msg.len);
-    // Evidemment, il faut tester le code retour de commWritev
-        struct iovec iov[MAX_MEMB];
-        int iovcnt = 0;
-        int rc;
 
-        buildNewSet(&(sharedSet->msg.body.set), iov, &iovcnt);
-        rc = commWritev(
-                bbSingleton.commToViewMembers[rankIthAfterMe(1<<bbSingleton.currentStep)],
-                iov,
-                iovcnt);
-        if (rc != sharedSet->msg.len) {
-            bbErrorAtLine(EXIT_FAILURE,
-                          errno,
-                          __FILE__,
-                          __LINE__,
-                          "error on write to a successor",
-                          1<<bbSingleton.currentStep);
-        }
+    int rc;
+
+    rc = commWrite(
+            bbSingleton.commToViewMembers[rankIthAfterMe(1)],
+            &(sharedSet->msg.body.set),
+            sharedSet->msg.len);
+    if (rc != sharedSet->msg.len) {
+        bbErrorAtLine(EXIT_FAILURE,
+                errno,
+                __FILE__,
+                __LINE__,
+                "error on write to a successor");
+    }
 
     deleteBbSharedMsg(sharedSet);
 

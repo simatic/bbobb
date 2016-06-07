@@ -11,8 +11,12 @@
 #include "bqueue.h"
 
 void bbCallbackCircuitChange(circuitView *pcv){
+
+    // We take into account the new view
     bbSingleton.view = *pcv;
     connectToViewMembers(pcv);
+
+    // We build a message for the application layer
     if (addrIsNull(pcv->cv_joined)) {
         // A process is gone
         if (addrIsMine(pcv->cv_members[0])) {
@@ -33,6 +37,13 @@ void bbCallbackCircuitChange(circuitView *pcv){
             bbSignalArrivalDepartures(AM_ARRIVAL, pcv);
         }
     }
+
+    // We create an event for the automaton
+    BbSharedMsg *sharedMsg = newBbSharedMsg(sizeof(BbMsg));
+    sharedMsg->msg.len  = sizeof(BbMsg);
+    sharedMsg->msg.type = BB_MSG_VIEW_CHANGE;
+    sharedMsg->msg.body.viewChange.view = *pcv;
+    bqueueEnqueue(bbSingleton.msgQueue, (void*)sharedMsg);
 }
 
 void bbCallbackODeliver(address sender, t_typ messageType, message * mp) {

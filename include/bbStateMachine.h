@@ -20,6 +20,7 @@
 typedef enum {
   BB_STATE_ALONE,              /**< The process is alone */
   BB_STATE_SEVERAL,            /**< There is more than one participating process */
+  BB_STATE_START,              /**< Starting state of the automaton */
   BB_STATE_VIEW_CHANGE, /**< Managing a view change */
 } BbState;
 

@@ -36,12 +36,14 @@ BbStateMachineFunc bbTransitions[BB_LAST_STATE+1][BB_LAST_MSG+1] = {
   /*      State  /  Received msg :    BB_MSG_RECOVER             BB_MSG_SET                 BB_MSG_VIEW_CHANGE            */
   /* BB_STATE_ALONE              */ { bbError,                   bbError,                   bbProcessViewChange },
   /* BB_STATE_SEVERAL            */ { bbError,                   bbProcessSet,              bbProcessViewChange },
+  /* BB_STATE_START              */ { bbError,                   bbError,                   bbProcessViewChange },
   /* BB_STATE_VIEW_CHANGE        */ { bbProcessRecover,          bbSaveSet,                 bbProcessViewChange }
 };
 
 char *state2str[] = {
     "BB_STATE_ALONE",
     "BB_STATE_SEVERAL",
+    "BB_STATE_START",
     "BB_STATE_VIEW_CHANGE"
 };
 
@@ -56,6 +58,7 @@ void sendBatchForStep0();
 
 int bbAutomatonInit(){
     int i,j, error = 0;
+    bbSingleton.automatonState = BB_STATE_START;
     waitingSharedSets = newList();
     for (i = 0; i<MAX_MEMB; i++) {
         for (j = 0; j < waveMax; j++) {
@@ -300,7 +303,7 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
 
     nbRecoverRcvd = 0;
     cleanList(waitingSharedSets);
-    bbSingleton.view = pSharedMsg->msg.body.recover.view;
+    // Already done in bbCallbackCircuitChange : bbSingleton.view = pSharedMsg->msg.body.recover.view;
     if (bbSingleton.initDone) {
         bbSingleton.viewId += 1;
     } else {
@@ -313,14 +316,23 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
         } else {
             bbSingleton.initDone = true;
         }
+        // We deliver batchToSend if it is not empty
+        MUTEX_LOCK(bbSingleton.batchToSendMutex);
+        BbSharedMsg *sharedSet = bbSingleton.batchToSend->sharedMsg;
+        if (sharedSet->msg.body.set.batches[0].len > sizeof (BbBatch)) {
+            bqueueEnqueue(bbSingleton.batchesToDeliver, newBatchInSharedMsg(sharedSet->msg.body.set.batches, sharedSet));
+            bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(bbSingleton.batchMaxLen);
+        }
+        MUTEX_UNLOCK(bbSingleton.batchToSendMutex);
+        pthread_cond_signal(&(bbSingleton.batchToSendCond));
+        return BB_STATE_ALONE;
     }
     else {
         waveMax = bbSingleton.currentWave;
         nbRecoverRcvd = 0;
         tOBroadcast_RECOVER();
-
+        return BB_STATE_VIEW_CHANGE;
     }
-    return BB_STATE_VIEW_CHANGE;
 }
 
 
@@ -402,7 +414,7 @@ void sendBatchForStep0() {
         sharedSet->msg.len = offsetof(BbMsg, body.set.batches);
     }
     bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(bbSingleton.batchMaxLen); //modif
-    MUTEX_LOCK(bbSingleton.batchToSendMutex);
+    MUTEX_UNLOCK(bbSingleton.batchToSendMutex);
     pthread_cond_signal(&(bbSingleton.batchToSendCond));
 
     sharedSet->msg.body.set.viewId = bbSingleton.viewId;

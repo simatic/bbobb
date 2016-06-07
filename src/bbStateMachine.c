@@ -477,7 +477,7 @@ void buildNewSet(BbMsg * pSet, struct iovec * iov, int * piovcnt) {
     iovcnt++;
     
     int i;
-    for(i=0, senderBatchToAdd; i < nbBatchesToAdd ; i++, senderBatchToAdd = bbAddrPrec(senderBatchToAdd)) {
+    for(i=0, senderBatchToAdd=myAddress; i < nbBatchesToAdd ; i++, senderBatchToAdd = bbAddrPrec(senderBatchToAdd)) {
         int rank = addrToRank(senderBatchToAdd);
         if(rcvdBatch[rank][bbSingleton.currentWave] != NULL) {
             iov[iovcnt].iov_base = rcvdBatch[rank][bbSingleton.currentWave];

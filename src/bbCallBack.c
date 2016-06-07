@@ -10,7 +10,7 @@
 #include "../include/bbSignalArrival.h"
 #include "bqueue.h"
 
-void callbackCircuitChange(circuitView *pcv){
+void bbCallbackCircuitChange(circuitView *pcv){
     bbSingleton.view = *pcv;
     connectToViewMembers(pcv);
     if (addrIsNull(pcv->cv_joined)) {
@@ -35,7 +35,7 @@ void callbackCircuitChange(circuitView *pcv){
     }
 }
 
-void callbackODeliver(address sender, t_typ messageType, message * mp) {
+void bbCallbackODeliver(address sender, t_typ messageType, message * mp) {
     BbMsg * msg = (BbMsg*)(mp->payload);
     BbSharedMsg * sharedMsg = newBbSharedMsg(msg->len);
     memcpy(&(sharedMsg->msg), msg, msg->len);

@@ -20,12 +20,12 @@
 
 BbSingleton bbSingleton;
 
-int bbSingletonInit(CallbackCircuitChange callbackCircuitChange, CallbackODeliver callbackODeliver, BbOrder reqOrder) {
+int bbSingletonInit(CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, BbOrder reqOrder) {
     int i;
     int rc;
     
-    bbSingleton.callbackCircuitChange = callbackCircuitChange;
-    bbSingleton.callbackODeliver = callbackODeliver;
+    bbSingleton.callbackCircuitChange = aCallbackCircuitChange;
+    bbSingleton.callbackODeliver = aCallbackODeliver;
     bbSingleton.reqOrder = reqOrder;
     bbSingleton.batchMaxLen = 1024;
     

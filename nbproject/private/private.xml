@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <code-assistance-data xmlns="http://www.netbeans.org/ns/make-project-private/1">
-        <code-model-enabled>true</code-model-enabled>
-    </code-assistance-data>
     <data xmlns="http://www.netbeans.org/ns/make-project-private/1">
         <activeConfTypeElem>0</activeConfTypeElem>
         <activeConfIndexElem>0</activeConfIndexElem>
@@ -10,22 +7,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbobb.h</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbComm.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbInterface.h</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/src/bqueue.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbApplicationMessage.h</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/include/applicationMessage.h</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbiomsg.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbError.h</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbApplicationMessage.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/Test/integration/basic/basicTest.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/src/list.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbSingleton.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbSingleton.h</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbInterface.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbiomsg.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbMsg.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbStateMachine.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbMsg.h</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbStateMachine.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbSharedMsg.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbiomsg.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbSharedMsg.c</file>
         </group>
     </open-files>
 </project-private>

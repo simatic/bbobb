@@ -46,6 +46,8 @@
           </df>
         </df>
         <df name="TestInit">
+          <df name="GNU-amd64-Linux">
+          </df>
           <in>makefile</in>
           <in>test.c</in>
         </df>
@@ -58,6 +60,8 @@
         <df name=".settings">
         </df>
         <df name="doc">
+          <df name="doxygen">
+          </df>
         </df>
         <df name="include">
           <in>address.h</in>
@@ -79,6 +83,8 @@
           <in>stateMachine.h</in>
           <in>trains.h</in>
           <in>wagon.h</in>
+        </df>
+        <df name="lib">
         </df>
         <df name="src">
           <in>address.c</in>

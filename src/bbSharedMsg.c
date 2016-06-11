@@ -109,6 +109,9 @@ BbBatchInSharedMsg* getBatchInSharedMsg(BbSharedMsg *sharedMsg, BbBatchInSharedM
         offset += offsetof(BbSetInRecover, set.batches);
         /*now offset is on first batch in set*/
         if(lastReturnedBatch == NULL) {
+            if((char*)offset - (char*)set >= set->len) {
+                return NULL;
+            }
             return newBatchInSharedMsg((BbBatch*)offset, sharedMsg);
         }
         if( (char*)lastReturnedBatch - (char*)set <= 0 || (char*)lastReturnedBatch - (char*)set >= set->len ) {

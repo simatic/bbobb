@@ -76,8 +76,8 @@ void tOBroadcast_RECOVER() {
     msg->body.recover.viewId = bbSingleton.viewId;
     if(bbSingleton.initDone) {
         msg->body.recover.nbSets = 2;
-        memcpy(msg->body.recover.sets, &(fset->body.set), fset->len - offsetof(BbMsg, body.set));
-        memcpy((char*)msg->body.recover.sets + fset->len, &(sset->body.set), sset->len - offsetof(BbMsg, body.set));       
+        memcpy(msg->body.recover.sets, fset, fset->len);
+        memcpy((char*)msg->body.recover.sets + fset->len, sset, sset->len);       
     } else {
         msg->body.recover.nbSets = 0;
     }

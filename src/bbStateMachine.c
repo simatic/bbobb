@@ -494,9 +494,9 @@ BbMsg * createSet(unsigned char waveNum) {
     BbMsg * set = NULL;
     
     int lenOfSet;
-    int lenOfBatches;
     int processIndex;
     
+    int lenOfBatches = 0;
     for(processIndex=0; processIndex<MAX_MEMB; processIndex++) {
         if(rcvdBatch[processIndex][waveNum] != NULL) {
             lenOfBatches += rcvdBatch[processIndex][waveNum]->batch->len;

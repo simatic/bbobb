@@ -7,13 +7,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbMsg.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbStateMachine.h</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbMsg.h</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbSingleton.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbInterface.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/TrainsProtocol/tests/integration/basic/basicTest.c</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbStateMachine.c</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/include/bbSharedMsg.h</file>
-            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbiomsg.c</file>
             <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbSharedMsg.c</file>
+            <file>file:/home/terag/Documents/code/Cassiopée/bbobb/src/bbiomsg.c</file>
         </group>
     </open-files>
 </project-private>

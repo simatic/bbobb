@@ -18,6 +18,7 @@
 #include "bbMsg.h"
 #include "bbSharedMsg.h"
 #include "comm.h"
+#include "common.h"
 
 #include <sys/uio.h>
 
@@ -25,10 +26,28 @@
 extern "C" {
 #endif
 
+/**
+ * @brief thread used to manage connection
+ * @note it creates new bbConnectionMgt threads
+ * @param null
+ * @return null
+ */
 void * waitCommForAccept(void *);
 
+/**
+ * @brief thread used to manage a port which receives msg
+ * @note initializes a port, read on it and do enQueue of datas read
+ * @param null
+ * @return null
+ */
 void * bbConnectionMgt(void * arg);
 
+/**
+ * @brief get data on aComm
+ * @note uses in bbConnectionMgt
+ * @param aComm, Comm to read
+ * @return read @a BbSharedMsg
+ */
 BbSharedMsg * bbReceive(trComm * aComm);
 
 /**
@@ -53,6 +72,14 @@ char *bbGetLocalPort();
  * @note Updates contents of @a bbSingleton.commToOtherViewMembers
  */
 void connectToViewMembers(circuitView *pcv);
+
+/**
+ * @brief function uses to compare two view
+ * @param view1 to compare
+ * @param view2 to compare
+ * @return true if view1 and view2 are equals, false if not
+ */
+bool isViewEqual(circuitView * view1, circuitView * view2);
 
 
 #ifdef __cplusplus

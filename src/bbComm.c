@@ -24,6 +24,7 @@
 #include "bbiomsg.h"
 #include "bbSingleton.h"
 #include "bbSharedMsg.h"
+#include "address.h"
 
 void * waitCommForAccept(void *unused){
 
@@ -101,4 +102,17 @@ void connectToViewMembers(circuitView *pcv){
             }
         }
     }
+}
+
+bool isViewEqual(circuitView * view1, circuitView * view2) {
+    int i;
+    if(view1->cv_nmemb != view2->cv_nmemb) {
+        return false;
+    }
+    for(i = 0; i < view1->cv_nmemb; i++) {
+        if(!addrIsEqual(view1->cv_members[i], view2->cv_members[i])){
+            return false;
+        }
+    }
+    return true;
 }

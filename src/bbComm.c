@@ -24,6 +24,7 @@
 #include "bbiomsg.h"
 #include "bbSingleton.h"
 #include "bbSharedMsg.h"
+#include "address.h"
 
 void * waitCommForAccept(void *unused){
 
@@ -45,27 +46,35 @@ void * bbConnectionMgt(void *arg){
     do{
         aMsg = (BbSharedMsg*)bbReceive(myComm);
         if(aMsg != NULL) {
-            bqueueEnqueue(bbSingleton.msgQueue, &aMsg);
+            bqueueEnqueue(bbSingleton.msgQueue, aMsg);
         }
     }while(aMsg != NULL);
     return NULL;
 }
 
-char *bbGetLocalPort(){
-    char *trainsPortAsString;
-    int trainsPortAsInt;
-    int rc;
+char *bbTrainsToBbobbPort(char *trPortAsString) {
     static char bbobbPortAsString[MAX_LEN_CHAN];
-    trainsPortAsString = getenv("TRAINS_PORT");
-    if (trainsPortAsString == NULL){
-        ERROR_AT_LINE_WITHOUT_ERRNUM(EXIT_FAILURE,__FILE__,__LINE__,"TRAINS_PORT environment variable is not defined");
-    }
-    rc = sscanf(trainsPortAsString, "%d", &trainsPortAsInt);
+    int trainsPortAsInt;
+    int rc = sscanf(trPortAsString, "%d", &trainsPortAsInt);
     if (rc != 1){
-        ERROR_AT_LINE_WITHOUT_ERRNUM(EXIT_FAILURE,__FILE__,__LINE__,"TRAINS_PORT environment variable contains \"%s\" which is not an integer",trainsPortAsString);
+        return NULL;
     }
     sprintf(bbobbPortAsString, "%d", trainsPortAsInt+INTERVAL_BETWEEN_TRAINS_AND_BBOBB_PORTS);
     return bbobbPortAsString;
+    
+}
+
+char *bbGetLocalPort(){
+    char *trainsPortAsString = getenv("TRAINS_PORT");
+    char *s;
+    if (trainsPortAsString == NULL){
+        ERROR_AT_LINE_WITHOUT_ERRNUM(EXIT_FAILURE,__FILE__,__LINE__,"TRAINS_PORT environment variable is not defined");
+    }
+    s = bbTrainsToBbobbPort(trainsPortAsString);
+    if (s == NULL){
+        ERROR_AT_LINE_WITHOUT_ERRNUM(EXIT_FAILURE,__FILE__,__LINE__,"TRAINS_PORT environment variable contains \"%s\" which is not an integer",trainsPortAsString);
+    }
+    return s;
 }
 
 void connectToViewMembers(circuitView *pcv){
@@ -93,12 +102,26 @@ void connectToViewMembers(circuitView *pcv){
             }
             bbSingleton.commToViewMembers[rank] = commNewAndConnect(
                     globalAddrArray[rank].ip,
-                    globalAddrArray[rank].chan,
+                    bbTrainsToBbobbPort(globalAddrArray[rank].chan),
                     CONNECT_TIMEOUT);
             if (bbSingleton.commToViewMembers[rank] == NULL ){
                 ERROR_AT_LINE_WITHOUT_ERRNUM(EXIT_FAILURE, __FILE__, __LINE__,
                     "Could not connect to process with address %d", pcv->cv_members[i]);                                
             }
+            printf("Connected to rank %d (%s / %s)\n", rank, globalAddrArray[rank].ip, bbTrainsToBbobbPort(globalAddrArray[rank].chan));
         }
     }
+}
+
+bool isViewEqual(circuitView * view1, circuitView * view2) {
+    int i;
+    if(view1->cv_nmemb != view2->cv_nmemb) {
+        return false;
+    }
+    for(i = 0; i < view1->cv_nmemb; i++) {
+        if(!addrIsEqual(view1->cv_members[i], view2->cv_members[i])){
+            return false;
+        }
+    }
+    return true;
 }

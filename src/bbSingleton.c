@@ -20,7 +20,7 @@
 
 BbSingleton bbSingleton;
 
-int bbSingletonInit(CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, BbOrder reqOrder) {
+int bbSingletonInit(CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, t_reqOrder reqOrder) {
     int i;
     int rc;
     
@@ -40,6 +40,7 @@ int bbSingletonInit(CallbackCircuitChange aCallbackCircuitChange, CallbackODeliv
     
     bbSingleton.currentWave = 0;
     bbSingleton.currentStep = 0;
+    //bbSingleton.viewId=0;
     
     bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(offsetof(BbSharedMsg,msg.body.set.batches)+bbSingleton.batchMaxLen);
 

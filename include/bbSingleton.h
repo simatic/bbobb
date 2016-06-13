@@ -36,7 +36,7 @@
 typedef struct {
     bool initDone; /*!<true if automaton is init>*/
     int error; /*!<use to detect error in BBOBB*/
-    BbOrder reqOrder; /*!<Order used in BBOBB>*/
+    t_reqOrder reqOrder; /*!<Order used in BBOBB>*/
     pthread_mutex_t stateMachineMutex; /*!<mutex used in statemachine>*/
     BbState automatonState; /*!<State of BBOBB automaton>*/
     address myAddress; /*!<address of the host process>*/
@@ -64,7 +64,7 @@ extern BbSingleton bbSingleton;
  * @brief initialisation of @a Singleton
  * @return a pointer on @a BbSingleton
  */
-int bbSingletonInit(CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, BbOrder reqOrder);
+int bbSingletonInit(CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, t_reqOrder reqOrder);
 
 #endif /* BBSINGLETON_H */
 

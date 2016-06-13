@@ -38,10 +38,12 @@ BbSharedMsg * bbReceive(trComm * aComm){
   int nbRead, nbRead2;
   int len;
 
+  printf("I wait for a len\n");
   nbRead = commReadFully(aComm, &len, sizeof(len));
   if (nbRead == sizeof(len)) {
     msgExt = newBbSharedMsg(len);
     msgExt->msg.len = len;
+    printf("I wait for %d bytes\n", len);
     nbRead2 = commReadFully(aComm,(char*)&(msgExt->msg.type), (len - nbRead));
     if (nbRead2 == len - nbRead) {
       return msgExt;
@@ -62,6 +64,7 @@ void tOBroadcast_RECOVER() {
         sset = createSet(bbSingleton.currentWave);
     }
     
+    
     int len = offsetof(BbMsg, body.recover.sets) + (bbSingleton.initDone ? fset->len + sset->len : 0);
     message *mp = newmsg(len);
     
@@ -74,8 +77,8 @@ void tOBroadcast_RECOVER() {
     msg->body.recover.viewId = bbSingleton.viewId;
     if(bbSingleton.initDone) {
         msg->body.recover.nbSets = 2;
-        memcpy(msg->body.recover.sets, &(fset->body.set), fset->len - offsetof(BbMsg, body.set));
-        memcpy((char*)msg->body.recover.sets + fset->len, &(sset->body.set), sset->len - offsetof(BbMsg, body.set));       
+        memcpy(msg->body.recover.sets, fset, fset->len);
+        memcpy((char*)msg->body.recover.sets + fset->len, sset, sset->len);       
     } else {
         msg->body.recover.nbSets = 0;
     }

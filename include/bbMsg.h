@@ -46,6 +46,9 @@ typedef struct {
 
 typedef struct {
     unsigned int len;
+    BB_MType typeForPadding; // Field unused in Recover messages, but required so 
+                             // that BbSetInRecover has exactly the same 
+                             // structure as BbSets in BbMsg
     BbSet set;
 }__attribute__((packed)) BbSetInRecover;
 

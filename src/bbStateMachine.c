@@ -245,7 +245,7 @@ void bbProcessPendingSets() {
         }
         bbSingleton.currentStep++;
      }
-    if(1<<bbSingleton.currentStep <= bbSingleton.view.cv_nmemb){
+    if(1<<bbSingleton.currentStep > bbSingleton.view.cv_nmemb){
         if (bbSingleton.reqOrder == TOTAL_ORDER){
             for (i = 0; i < MAX_MEMB; i++) {
                 if (rcvdBatch[i][bbSingleton.currentWave] != NULL){

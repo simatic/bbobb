@@ -20,7 +20,7 @@
 
 BbSingleton bbSingleton;
 
-int bbSingletonInit(CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, BbOrder reqOrder) {
+int bbSingletonInit(CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, t_reqOrder reqOrder) {
     int i;
     int rc;
     

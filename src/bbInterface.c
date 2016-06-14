@@ -31,7 +31,7 @@ int bbErrno;
     return 0;
 }*/
 
-int bbInit(int batchMaxLen, int waitNb, int waitTime, CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, BbOrder reqOrder){
+int bbInit(int batchMaxLen, int waitNb, int waitTime, CallbackCircuitChange aCallbackCircuitChange, CallbackODeliver aCallbackODeliver, t_reqOrder reqOrder){
     
     bbErrno = 0;
     

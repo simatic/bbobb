@@ -406,6 +406,8 @@ void forceDeliver() {
 
             }
         }
+    } else {
+        bbSingleton.currentWave = waveMax;
     }
 
     for (i = 0; i < NB_WAVE ; i++) {
@@ -418,7 +420,8 @@ void forceDeliver() {
     }
 
     bbSingleton.initDone = true;
-    if (waveMax > bbSingleton.currentWave + 2) {
+    if (   ((waveMax > bbSingleton.currentWave) && (waveMax > bbSingleton.currentWave + 2))
+        || ((waveMax < bbSingleton.currentWave) && (waveMax + NB_WAVE > bbSingleton.currentWave + 2))){
         bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
                 __FILE__,
                 __LINE__,
@@ -426,7 +429,7 @@ void forceDeliver() {
 
     }
 
-    bbSingleton.currentWave = waveMax + 1;
+    bbSingleton.currentWave = NEXT_WAVE(waveMax);
 }
 
 void sendBatchForStep0() {

@@ -52,7 +52,7 @@ BbBatchInSharedMsg* newEmptyBatchInNewSharedMsg(size_t batchMaxSize){
     BbBatchInSharedMsg *batchInSharedMsg = newBatchInSharedMsg(sharedSet->msg.body.set.batches, sharedSet);
     deleteBbSharedMsg(sharedSet);
     sharedSet = NULL;
-    batchInSharedMsg->batch->sender = bbSingleton.myAddress;
+    batchInSharedMsg->batch->sender = myAddress;
     batchInSharedMsg->batch->len = sizeof(BbBatch);
     return batchInSharedMsg;
 }

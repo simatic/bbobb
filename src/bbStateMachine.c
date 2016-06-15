@@ -15,9 +15,9 @@
 // fonctions à faire: sizeview, newview
 //A ajouter = remplir waiting set, queue, etc
 static unsigned char waveMax;
-static BbBatchInSharedMsg* rcvdBatch[MAX_MEMB][WAVE_MAX];
+static BbBatchInSharedMsg* rcvdBatch[NB_WAVE][MAX_MEMB];
 static int nbRecoverRcvd; 
-static bool rcvdSet[MAX_MEMB][WAVE_MAX];
+static bool rcvdSet[NB_WAVE][NB_STEP];
 static trList *waitingSharedSets = NULL;
 BbState bbAutomatonState;
 //int addrToIndex();
@@ -57,12 +57,15 @@ char *msg2str[]= {
 void forceDeliver();
 void sendBatchForStep0();
 
+#define PREV_WAVE(wave) (wave > 0 ? wave - 1 : NB_WAVE - 1)
+#define NEXT_WAVE(wave) ((wave + 1) % NB_WAVE)
+
 int bbAutomatonInit(){
     int i,j, error = 0;
     bbSingleton.automatonState = BB_STATE_START;
     waitingSharedSets = newList();
-    for (i = 0; i<MAX_MEMB; i++) {
-        for (j = 0; j < waveMax; j++) {
+    for (i = 0; i < NB_WAVE ; i++) {
+        for (j = 0; j < MAX_MEMB ; j++) {
             rcvdBatch[i][j] = NULL;
         }
     }
@@ -90,15 +93,12 @@ int bbAutomatonInit(){
     
     waitingSharedSets = newList();
     
-    printf("AutomatonInit : OK\n");
-        
     return 0;
 }
 
 void * bbMsgTreatement(void* unused){
 
     BbSharedMsg * sharedMsg = NULL;
-    printf("MsgTreatementThread : OK\n");
     do {
         sharedMsg = (BbSharedMsg*)bqueueDequeue(bbSingleton.msgQueue);
 
@@ -126,9 +126,9 @@ void bbStateMachineTransition(BbSharedMsg* pSharedMsg){
 			       0,
 			       BB_LAST_STATE);
   }
-  printf("In state \"%s\", automaton receives message \"%s\"\n", state2str[bbSingleton.automatonState], msg2str[pSharedMsg->msg.type]);
+  //printf("In state \"%s\", automaton receives message \"%s\"\n", state2str[bbSingleton.automatonState], msg2str[pSharedMsg->msg.type]);
   bbSingleton.automatonState = (*bbTransitions[bbSingleton.automatonState][pSharedMsg->msg.type])(bbSingleton.automatonState, pSharedMsg);
-  printf("   Next state = \"%s\"\n", state2str[bbSingleton.automatonState]);
+  //printf("   Next state = \"%s\"\n", state2str[bbSingleton.automatonState]);
 }
 
 BbState bbError(BbState state, BbSharedMsg* pSharedMsg){
@@ -143,16 +143,16 @@ BbState bbError(BbState state, BbSharedMsg* pSharedMsg){
 }
 BbState bbProcessRecover(BbState state, BbSharedMsg* pSharedMsg) {//A CHANGER?
 
-    char* offset;
-    offset = (char*) pSharedMsg + offsetof(BbSharedMsg, msg.body.recover.sets[0]);
-    offset += pSharedMsg->msg.body.recover.sets[0].len + offsetof(BbSetInRecover, set);
-    BbSet* pSet = (BbSet*) offset;
-    BbBatchInSharedMsg* pBatch;
-
     if (isViewEqual(&(pSharedMsg->msg.body.recover.view), &bbSingleton.view)) {
         
         nbRecoverRcvd++;
         if (pSharedMsg->msg.body.recover.initDone) {
+            // We are sure this RECOVER message contains at least one set
+            char* offset;
+            offset = (char*) pSharedMsg + offsetof(BbSharedMsg, msg.body.recover.sets[0]);
+            offset += pSharedMsg->msg.body.recover.sets[0].len + offsetof(BbSetInRecover, set);
+            BbSet* pSet = (BbSet*) offset;
+            BbBatchInSharedMsg* pBatch;
 
             if (!(bbSingleton.initDone)) {
                 bbSingleton.viewId = pSharedMsg->msg.body.recover.viewId;
@@ -163,9 +163,8 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pSharedMsg) {//A CHANGER?
                 for (pBatch = getBatchInSharedMsg(pSharedMsg, NULL, 0) ;
                      pBatch != NULL ;
                      pBatch = getBatchInSharedMsg(pSharedMsg, pBatch, 0) ) {
-                    printf("\nptr : %p\n", pBatch);
-                    if (rcvdBatch[(pSharedMsg->msg.body.recover.sets[0].set.wave)][pBatch->batch->sender] == NULL) {
-                        rcvdBatch[(pSharedMsg->msg.body.recover.sets[0].set.wave)][pBatch->batch->sender] = pBatch;
+                    if (rcvdBatch[pSharedMsg->msg.body.recover.sets[0].set.wave][pBatch->batch->sender] == NULL) {
+                        rcvdBatch[pSharedMsg->msg.body.recover.sets[0].set.wave][pBatch->batch->sender] = pBatch;
                     } else {
                         deleteBatchInSharedMsg(pBatch);
                     }
@@ -177,8 +176,8 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pSharedMsg) {//A CHANGER?
             for (pBatch = getBatchInSharedMsg(pSharedMsg, NULL, 1) ;
                 pBatch != NULL;
                 pBatch = getBatchInSharedMsg(pSharedMsg, pBatch, 1)) {
-                if (rcvdBatch[(pSet->wave)][pBatch->batch->sender] == NULL) {
-                    rcvdBatch[(pSet->wave)][pBatch->batch->sender] = pBatch;
+                if (rcvdBatch[pSet->wave][pBatch->batch->sender] == NULL) {
+                    rcvdBatch[pSet->wave][pBatch->batch->sender] = pBatch;
                 }
 
                 else {
@@ -224,7 +223,7 @@ void bbProcessPendingSets() {
      
     int i;
 
-    while (rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep-1] && 1<<bbSingleton.currentStep < bbSingleton.view.cv_nmemb){
+    while ((bbSingleton.currentStep > 0) && rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep-1] && 1<<bbSingleton.currentStep < bbSingleton.view.cv_nmemb){
         BbMsg newSet;
         struct iovec iov[MAX_MEMB];
         int iovcnt = 0;
@@ -244,24 +243,24 @@ void bbProcessPendingSets() {
                           1<<bbSingleton.currentStep);
         }
         bbSingleton.currentStep++;
-     }
-    if(1<<bbSingleton.currentStep > bbSingleton.view.cv_nmemb){
+    }
+    if(1<<bbSingleton.currentStep >= bbSingleton.view.cv_nmemb){
         if (bbSingleton.reqOrder == TOTAL_ORDER){
             for (i = 0; i < MAX_MEMB; i++) {
-                if (rcvdBatch[i][bbSingleton.currentWave] != NULL){
-                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[i][bbSingleton.currentWave]);
+                if (rcvdBatch[bbSingleton.currentWave][i] != NULL){
+                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[bbSingleton.currentWave][i]);
                 }
             }
         }        
         else if (bbSingleton.reqOrder == UNIFORM_TOTAL_ORDER){
             for (i = 0; i < MAX_MEMB; i++) {
-                if (rcvdBatch[i][bbSingleton.currentWave-1] != NULL){ 
-                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[i][bbSingleton.currentWave-1]);
+                if (rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] != NULL){ 
+                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]);
                 }
             }
         }
         for (i = 0; i < MAX_MEMB; i++) {
-            rcvdBatch[i][bbSingleton.currentWave-1] = NULL;            
+            rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] = NULL;            
         }
 /**
 59:       for each key in rcvdBatch[wave-1].keys() do
@@ -269,7 +268,7 @@ void bbProcessPendingSets() {
 61: 	 rcvdBatch[wave-1].remove(key)*/
 
         //delivBatch = [];
-        bbSingleton.currentWave ++;
+        bbSingleton.currentWave = NEXT_WAVE(bbSingleton.currentWave);
         sendBatchForStep0();
         bbProcessPendingSets();
     }
@@ -284,12 +283,15 @@ BbState bbProcessSet(BbState state, BbSharedMsg* pSharedMsg) {
 
 13:    end for
 14:    processPendingSets()*/
-    BbBatchInSharedMsg* pBatch = NULL;
+    BbBatchInSharedMsg* pBatch;
     rcvdSet[pSharedMsg->msg.body.set.wave][pSharedMsg->msg.body.set.step] = true;
-    for (   pBatch = getBatchInSharedMsg(pSharedMsg, pBatch, 1) ;
+    for (   pBatch = getBatchInSharedMsg(pSharedMsg, NULL, 0) ;
             pBatch != NULL ;
-            pBatch = getBatchInSharedMsg(pSharedMsg, pBatch, 1)   ) {
-        rcvdBatch[pSharedMsg->msg.body.set.wave][pBatch->batch->sender] = pBatch;
+            pBatch = getBatchInSharedMsg(pSharedMsg, pBatch, 0)   ) {
+        rcvdBatch[pSharedMsg->msg.body.set.wave][addrToRank(pBatch->batch->sender)] = pBatch;
+    }
+    if (rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep]) {
+        bbSingleton.currentStep++;
     }
     bbProcessPendingSets();
     return state;
@@ -377,16 +379,16 @@ void forceDeliver() {
         if (bbSingleton.reqOrder == UNIFORM_TOTAL_ORDER) {
 
             for (i = 0; i < MAX_MEMB; i++) {//foreach key in rcvdBatch[wave-1].keys() do
-                if (rcvdBatch[i][bbSingleton.currentWave - 1] != NULL){ // TODO : METTRE A NULL
+                if (rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] != NULL){ // TODO : METTRE A NULL
                         //O-deliver(rcvdBatch[wave-1].get(key).msgs)
-                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[i][bbSingleton.currentWave-1]);
+                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]);
                     }
             }
         }
         for (i = 0; i < MAX_MEMB; i++) {
-            if (rcvdBatch[i][bbSingleton.currentWave] != NULL){ // TODO : METTRE A NULL
+            if (rcvdBatch[bbSingleton.currentWave][i] != NULL){ // TODO : METTRE A NULL
                     //O-deliver(rcvdBatch[wave].get(key).msgs)
-                bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[i][bbSingleton.currentWave]);
+                bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[bbSingleton.currentWave][i]);
                 }
         }
         //foreach key in rcvdBatch[wave].keys() do
@@ -397,19 +399,21 @@ void forceDeliver() {
 
             //foreach key in rcvdBatch[waveMax].keys() do
             for (i = 0; i < MAX_MEMB; i++) {
-                if (rcvdBatch[i][bbSingleton.currentWave] != NULL){ // TODO : METTRE A NULL
+                if (rcvdBatch[bbSingleton.currentWave][i] != NULL){ // TODO : METTRE A NULL
                         //O-deliver(rcvdBatch[waveMax].get(key).msgs) -> bqueueEnqueue
-                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[i][bbSingleton.currentWave]);
+                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[bbSingleton.currentWave][i]);
                     }
 
             }
         }
     }
 
-    for (i = 0; i<MAX_MEMB; i++) {
-        for (j = 0; j < WAVE_MAX; j++) {
+    for (i = 0; i < NB_WAVE ; i++) {
+        for (j = 0; j < MAX_MEMB ; j++) {
             rcvdBatch[i][j] = NULL;
-                    rcvdSet[i][j] = false;
+        }
+        for (j = 0; j < NB_STEP ; j++) {
+            rcvdSet[i][j] = false;
         }
     }
 
@@ -436,7 +440,6 @@ void sendBatchForStep0() {
     } else {
         sharedSet->msg.len = offsetof(BbMsg, body.set.batches);
     }
-    printf("**** LEN = %d ***\n", sharedSet->msg.len);
     bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(bbSingleton.batchMaxLen); //modif
     MUTEX_UNLOCK(bbSingleton.batchToSendMutex);
     pthread_cond_signal(&(bbSingleton.batchToSendCond));
@@ -460,9 +463,6 @@ void sendBatchForStep0() {
     }
 
     deleteBbSharedMsg(sharedSet);
-
-    bbSingleton.currentStep++;
-
 }
 
 address bbAddrPrec(address ad) {
@@ -493,8 +493,8 @@ BbMsg * createSet(unsigned char waveNum) {
     
     int lenOfBatches = 0;
     for(processIndex=0; processIndex<MAX_MEMB; processIndex++) {
-        if(rcvdBatch[processIndex][waveNum] != NULL) {
-            lenOfBatches += rcvdBatch[processIndex][waveNum]->batch->len;
+        if(rcvdBatch[waveNum][processIndex] != NULL) {
+            lenOfBatches += rcvdBatch[waveNum][processIndex]->batch->len;
         }
     }
     
@@ -511,9 +511,9 @@ BbMsg * createSet(unsigned char waveNum) {
     //We fill the batches of the set
     lenOfBatches = 0;
     for(processIndex=0; processIndex<MAX_MEMB; processIndex++) {
-        if(rcvdBatch[processIndex][waveNum] != NULL) {
-            memcpy((char*)&(set->body.set.batches)+lenOfBatches, rcvdBatch[processIndex][waveNum], rcvdBatch[processIndex][waveNum]->batch->len);
-            lenOfBatches += rcvdBatch[processIndex][waveNum]->batch->len;
+        if(rcvdBatch[waveNum][processIndex] != NULL) {
+            memcpy((char*)&(set->body.set.batches)+lenOfBatches, rcvdBatch[waveNum][processIndex], rcvdBatch[waveNum][processIndex]->batch->len);
+            lenOfBatches += rcvdBatch[waveNum][processIndex]->batch->len;
         }
     }
     
@@ -542,9 +542,9 @@ void buildNewSet(BbMsg * pSet, struct iovec * iov, int * piovcnt) {
     int i;
     for(i=0, senderBatchToAdd=myAddress; i < nbBatchesToAdd ; i++, senderBatchToAdd = bbAddrPrec(senderBatchToAdd)) {
         int rank = addrToRank(senderBatchToAdd);
-        if(rcvdBatch[rank][bbSingleton.currentWave] != NULL) {
-            iov[iovcnt].iov_base = rcvdBatch[rank][bbSingleton.currentWave];
-            iov[iovcnt].iov_len = rcvdBatch[rank][bbSingleton.currentWave]->batch->len;
+        if(rcvdBatch[bbSingleton.currentWave][rank] != NULL) {
+            iov[iovcnt].iov_base = rcvdBatch[bbSingleton.currentWave][rank];
+            iov[iovcnt].iov_len = rcvdBatch[bbSingleton.currentWave][rank]->batch->len;
             pSet->len += iov[iovcnt].iov_len;
             iovcnt++;
         }

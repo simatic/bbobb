@@ -81,7 +81,6 @@ void myCallbackCircuitChange(circuitView *cp){
 void myCallbackODeliver(address sender, t_typ messageTyp, message *mp){
   char s[MAX_LEN_ADDRESS_AS_STR];
   static int nbRecMsg = 0;
-  printf("\nodeliver\n");
   if (messageTyp != TEST_MESSAGE) {
     fprintf(stderr,
 	    "Error in file %s:%d : Was waiting for message #%d and received message #%d\n",

@@ -27,9 +27,6 @@
 #include "address.h"
 
 void * waitCommForAccept(void *unused){
-
-    printf("ConnectionWait : OK\n");
-
     do{
         trComm *aComm = commAccept(bbSingleton.commForAccept);
         pthread_t thread;
@@ -41,7 +38,6 @@ void * waitCommForAccept(void *unused){
 void * bbConnectionMgt(void *arg){    
     BbSharedMsg * aMsg ;
     trComm * myComm = (trComm*)arg;
-    printf("ConnectionMgt : OK\n");
     
     do{
         aMsg = (BbSharedMsg*)bbReceive(myComm);
@@ -108,7 +104,6 @@ void connectToViewMembers(circuitView *pcv){
                 ERROR_AT_LINE_WITHOUT_ERRNUM(EXIT_FAILURE, __FILE__, __LINE__,
                     "Could not connect to process with address %d", pcv->cv_members[i]);                                
             }
-            printf("Connected to rank %d (%s / %s)\n", rank, globalAddrArray[rank].ip, bbTrainsToBbobbPort(globalAddrArray[rank].chan));
         }
     }
 }

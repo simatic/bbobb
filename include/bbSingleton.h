@@ -39,7 +39,6 @@ typedef struct {
     t_reqOrder reqOrder; /*!<Order used in BBOBB>*/
     pthread_mutex_t stateMachineMutex; /*!<mutex used in statemachine>*/
     BbState automatonState; /*!<State of BBOBB automaton>*/
-    address myAddress; /*!<address of the host process>*/
     unsigned char currentWave; /*!<current wave for automaton>*/
     unsigned char currentStep; /*!<current step in current wave>*/
     unsigned char viewSize; /*!<number of paticipants, max 256>*/

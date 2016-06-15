@@ -38,12 +38,10 @@ BbSharedMsg * bbReceive(trComm * aComm){
   int nbRead, nbRead2;
   int len;
 
-  printf("I wait for a len\n");
   nbRead = commReadFully(aComm, &len, sizeof(len));
   if (nbRead == sizeof(len)) {
     msgExt = newBbSharedMsg(len);
     msgExt->msg.len = len;
-    printf("I wait for %d bytes\n", len);
     nbRead2 = commReadFully(aComm,(char*)&(msgExt->msg.type), (len - nbRead));
     if (nbRead2 == len - nbRead) {
       return msgExt;
@@ -71,7 +69,7 @@ void tOBroadcast_RECOVER() {
     BbMsg *msg = (BbMsg*)(mp->payload);
     msg->len = len;
     msg->type = BB_MSG_RECOVER;
-    msg->body.recover.sender = bbSingleton.myAddress;
+    msg->body.recover.sender = myAddress;
     msg->body.recover.view = bbSingleton.view;
     msg->body.recover.initDone = bbSingleton.initDone;
     msg->body.recover.viewId = bbSingleton.viewId;

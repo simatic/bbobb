@@ -9,3 +9,7 @@ doc
 lib
 # All that is related to Netbeans
 nbproject
+# core files
+core
+# executables
+basicTest

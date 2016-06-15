@@ -223,12 +223,13 @@ void bbProcessPendingSets() {
      
     int i;
 
-    while ((bbSingleton.currentStep > 0) && rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep-1] && 1<<bbSingleton.currentStep < bbSingleton.view.cv_nmemb){
+    while (rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep] && 1<<(bbSingleton.currentStep+1) < bbSingleton.view.cv_nmemb){
         BbMsg newSet;
         struct iovec iov[MAX_MEMB];
         int iovcnt = 0;
         int rc;
 
+        bbSingleton.currentStep++;
         buildNewSet(&newSet, iov, &iovcnt);
         rc = commWritev(
                 bbSingleton.commToViewMembers[rankIthAfterMe(1<<bbSingleton.currentStep)],
@@ -242,7 +243,6 @@ void bbProcessPendingSets() {
                           "error on write to a successor",
                           1<<bbSingleton.currentStep);
         }
-        bbSingleton.currentStep++;
     }
     if(1<<bbSingleton.currentStep >= bbSingleton.view.cv_nmemb){
         if (bbSingleton.reqOrder == TOTAL_ORDER){

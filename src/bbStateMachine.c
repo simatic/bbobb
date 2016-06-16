@@ -235,6 +235,10 @@ void bbProcessPendingSets() {
                 bbSingleton.commToViewMembers[rankIthAfterMe(1<<bbSingleton.currentStep)],
                 iov,
                 iovcnt);
+        printf("Envoi SET dans la wave %3d et le step %3d a processus %2d\n",
+            bbSingleton.currentWave,
+            bbSingleton.currentStep,
+            rankIthAfterMe(1<<bbSingleton.currentStep));
         if (rc != newSet.len) {
             bbErrorAtLine(EXIT_FAILURE,
                           errno,
@@ -289,9 +293,6 @@ BbState bbProcessSet(BbState state, BbSharedMsg* pSharedMsg) {
             pBatch != NULL ;
             pBatch = getBatchInSharedMsg(pSharedMsg, pBatch, 0)   ) {
         rcvdBatch[pSharedMsg->msg.body.set.wave][addrToRank(pBatch->batch->sender)] = pBatch;
-    }
-    if (rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep]) {
-        bbSingleton.currentStep++;
     }
     bbProcessPendingSets();
     return state;
@@ -457,6 +458,10 @@ void sendBatchForStep0() {
             bbSingleton.commToViewMembers[rankIthAfterMe(1)],
             &(sharedSet->msg.len),
             sharedSet->msg.len);
+    printf("Envoi SET dans la wave %3d et le step %3d a processus %2d\n",
+            sharedSet->msg.body.set.wave,
+            sharedSet->msg.body.set.step,
+            rankIthAfterMe(1));
     if (rc != sharedSet->msg.len) {
         bbErrorAtLine(EXIT_FAILURE,
                 errno,

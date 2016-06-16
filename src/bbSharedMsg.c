@@ -86,7 +86,7 @@ BbBatchInSharedMsg* getBatchInSharedMsg(BbSharedMsg *sharedMsg, BbBatchInSharedM
         if(lastReturnedBatch == NULL) {
             offset = (char*)&(sharedMsg->msg.body.set.batches[0]);
         } else {
-            offset = (char*)lastReturnedBatch + lastReturnedBatch->batch->len;
+            offset = (char*)(lastReturnedBatch->batch) + lastReturnedBatch->batch->len;
         }
         if(offset - (char*)&(sharedMsg->msg) >= len) {
             return NULL;
@@ -114,14 +114,14 @@ BbBatchInSharedMsg* getBatchInSharedMsg(BbSharedMsg *sharedMsg, BbBatchInSharedM
             }
             return newBatchInSharedMsg((BbBatch*)offset, sharedMsg);
         }
-        if( (char*)lastReturnedBatch - (char*)set <= 0 || (char*)lastReturnedBatch - (char*)set >= set->len ) {
+        if( (char*)(lastReturnedBatch->batch) - (char*)set <= 0 || (char*)(lastReturnedBatch->batch) - (char*)set >= set->len ) {
             bbErrorAtLineWithoutErrnum( EXIT_FAILURE,
                                         __FILE__,
                                         __LINE__,
                                         "lastReturnedBatch is not in rankSet");
         }
         
-        offset = (char*)lastReturnedBatch + lastReturnedBatch->batch->len;
+        offset = (char*)(lastReturnedBatch->batch) + lastReturnedBatch->batch->len;
         if((char*)offset - (char*)set >= set->len) {
             return NULL;
         }

@@ -84,7 +84,7 @@ BbBatchInSharedMsg* getBatchInSharedMsg(BbSharedMsg *sharedMsg, BbBatchInSharedM
     switch (type) {
     case BB_MSG_SET :
         if(lastReturnedBatch == NULL) {
-            offset = (char*)&(sharedMsg->msg.body.set.batches[0]);
+            offset = (char*)&(sharedMsg->msg.body.set.batches[0].len);
         } else {
             offset = (char*)(lastReturnedBatch->batch) + lastReturnedBatch->batch->len;
         }

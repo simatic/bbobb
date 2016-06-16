@@ -223,22 +223,22 @@ void bbProcessPendingSets() {
      
     int i;
 
-    while (rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep] && 1<<(bbSingleton.currentStep+1) < bbSingleton.view.cv_nmemb){
+    while ((bbSingleton.currentStep > 0) && (rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep-1]) && (1<<bbSingleton.currentStep < bbSingleton.view.cv_nmemb)){
         BbMsg newSet;
         struct iovec iov[MAX_MEMB];
         int iovcnt = 0;
         int rc;
 
-        bbSingleton.currentStep++;
         buildNewSet(&newSet, iov, &iovcnt);
         rc = commWritev(
                 bbSingleton.commToViewMembers[rankIthAfterMe(1<<bbSingleton.currentStep)],
                 iov,
                 iovcnt);
-        printf("Envoi SET dans la wave %3d et le step %3d a processus %2d\n",
+        printf("Envoi SET dans la wave %3d et le step %3d a processus %2d (iovcnt = %d)\n",
             bbSingleton.currentWave,
             bbSingleton.currentStep,
-            rankIthAfterMe(1<<bbSingleton.currentStep));
+            rankIthAfterMe(1<<bbSingleton.currentStep),
+            iovcnt);
         if (rc != newSet.len) {
             bbErrorAtLine(EXIT_FAILURE,
                           errno,
@@ -247,6 +247,7 @@ void bbProcessPendingSets() {
                           "error on write to a successor",
                           1<<bbSingleton.currentStep);
         }
+        bbSingleton.currentStep++;
     }
     if(1<<bbSingleton.currentStep >= bbSingleton.view.cv_nmemb){
         if (bbSingleton.reqOrder == TOTAL_ORDER){
@@ -263,8 +264,11 @@ void bbProcessPendingSets() {
                 }
             }
         }
+        for (i = 0; i < NB_STEP; i++) {
+            rcvdSet[PREV_WAVE(bbSingleton.currentWave)][i] = false;            
+        }
         for (i = 0; i < MAX_MEMB; i++) {
-            rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] = NULL;            
+            rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] = NULL;
         }
 /**
 59:       for each key in rcvdBatch[wave-1].keys() do
@@ -293,6 +297,9 @@ BbState bbProcessSet(BbState state, BbSharedMsg* pSharedMsg) {
             pBatch != NULL ;
             pBatch = getBatchInSharedMsg(pSharedMsg, pBatch, 0)   ) {
         rcvdBatch[pSharedMsg->msg.body.set.wave][addrToRank(pBatch->batch->sender)] = pBatch;
+    }
+    if (pSharedMsg->msg.body.set.step == bbSingleton.currentStep) {
+        bbSingleton.currentStep++;
     }
     bbProcessPendingSets();
     return state;
@@ -441,6 +448,7 @@ void sendBatchForStep0() {
     if (sharedSet->msg.body.set.batches[0].len > sizeof (BbBatch)) {
         rcvdBatch[bbSingleton.currentWave][addrToRank(myAddress)] = newBatchInSharedMsg(sharedSet->msg.body.set.batches, sharedSet);
         sharedSet->msg.len = offsetof(BbMsg, body.set.batches) + sharedSet->msg.body.set.batches[0].len;
+        printf("sharedSet->msg.len = %d\n", sharedSet->msg.len);
     } else {
         sharedSet->msg.len = offsetof(BbMsg, body.set.batches);
     }

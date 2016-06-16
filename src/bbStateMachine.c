@@ -234,11 +234,6 @@ void bbProcessPendingSets() {
                 bbSingleton.commToViewMembers[rankIthAfterMe(1<<bbSingleton.currentStep)],
                 iov,
                 iovcnt);
-        printf("Envoi SET dans la wave %3d et le step %3d a processus %2d (iovcnt = %d)\n",
-            bbSingleton.currentWave,
-            bbSingleton.currentStep,
-            rankIthAfterMe(1<<bbSingleton.currentStep),
-            iovcnt);
         if (rc != newSet.len) {
             bbErrorAtLine(EXIT_FAILURE,
                           errno,
@@ -466,10 +461,6 @@ void sendBatchForStep0() {
             bbSingleton.commToViewMembers[rankIthAfterMe(1)],
             &(sharedSet->msg.len),
             sharedSet->msg.len);
-    printf("Envoi SET dans la wave %3d et le step %3d a processus %2d\n",
-            sharedSet->msg.body.set.wave,
-            sharedSet->msg.body.set.step,
-            rankIthAfterMe(1));
     if (rc != sharedSet->msg.len) {
         bbErrorAtLine(EXIT_FAILURE,
                 errno,
@@ -550,7 +541,7 @@ void buildNewSet(BbMsg * pSet, struct iovec * iov, int * piovcnt) {
     pSet->body.set.step = bbSingleton.currentStep;
     
     iov[iovcnt].iov_base = pSet;
-    iov[iovcnt].iov_len = offsetof(BbSharedMsg, msg.body.set.batches);
+    iov[iovcnt].iov_len = offsetof(BbMsg, body.set.batches);
     pSet->len = iov[iovcnt].iov_len;
 
     iovcnt++;

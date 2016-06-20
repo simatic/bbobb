@@ -94,7 +94,7 @@ BbBatchInSharedMsg* getBatchInSharedMsg(BbSharedMsg *sharedMsg, BbBatchInSharedM
         batch = (BbBatch*)offset;
         break;
     case BB_MSG_RECOVER :
-        if(rankSet > sharedMsg->msg.body.recover.nbSets) {
+        if(rankSet >= sharedMsg->msg.body.recover.nbSets) {
             return NULL;
         }
         

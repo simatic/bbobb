@@ -56,6 +56,7 @@ char *msg2str[]= {
 
 void forceDeliver();
 void sendBatchForStep0();
+void tOBroadcast_RECOVER();
 
 #define PREV_WAVE(wave) (wave > 0 ? wave - 1 : NB_WAVE - 1)
 #define NEXT_WAVE(wave) ((wave + 1) % NB_WAVE)
@@ -559,4 +560,38 @@ void buildNewSet(BbMsg * pSet, struct iovec * iov, int * piovcnt) {
     }
 
     *piovcnt = iovcnt;
+}
+
+void tOBroadcast_RECOVER() {
+    BbMsg * fset = NULL;
+    BbMsg * sset = NULL;
+    
+    if(bbSingleton.initDone) {
+        fset = createSet(PREV_WAVE(bbSingleton.currentWave));
+        sset = createSet(bbSingleton.currentWave);
+    }
+    
+    int len = offsetof(BbMsg, body.recover.sets) + (bbSingleton.initDone ? fset->len + sset->len : 0);
+    message *mp = newmsg(len);
+    
+    BbMsg *msg = (BbMsg*)(mp->payload);
+    msg->len = len;
+    msg->type = BB_MSG_RECOVER;
+    msg->body.recover.sender = myAddress;
+    msg->body.recover.view = bbSingleton.view;
+    msg->body.recover.initDone = bbSingleton.initDone;
+    msg->body.recover.viewId = bbSingleton.viewId;
+    if(bbSingleton.initDone) {
+        msg->body.recover.nbSets = 2;
+        memcpy(msg->body.recover.sets, fset, fset->len);
+        memcpy((char*)msg->body.recover.sets + fset->len, sset, sset->len);       
+    } else {
+        msg->body.recover.nbSets = 0;
+    }
+    oBroadcast(FIRST_VALUE_AVAILABLE_FOR_MESS_TYP, mp);
+    
+    free(fset);
+    fset = NULL;
+    free(sset);
+    sset = NULL;
 }

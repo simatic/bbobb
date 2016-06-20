@@ -433,6 +433,7 @@ void forceDeliver() {
     }
 
     bbSingleton.currentWave = NEXT_WAVE(waveMax);
+    printf("At the end of forceDeliver(), bbSingleton.currentWave = %d\n", bbSingleton.currentWave);
 }
 
 void sendBatchForStep0() {
@@ -519,7 +520,7 @@ BbMsg * createSet(unsigned char waveNum) {
     lenOfBatches = 0;
     for(processIndex=0; processIndex<MAX_MEMB; processIndex++) {
         if(rcvdBatch[waveNum][processIndex] != NULL) {
-            memcpy((char*)&(set->body.set.batches)+lenOfBatches, rcvdBatch[waveNum][processIndex], rcvdBatch[waveNum][processIndex]->batch->len);
+            memcpy((char*)&(set->body.set.batches)+lenOfBatches, rcvdBatch[waveNum][processIndex]->batch, rcvdBatch[waveNum][processIndex]->batch->len);
             lenOfBatches += rcvdBatch[waveNum][processIndex]->batch->len;
         }
     }

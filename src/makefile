@@ -65,6 +65,9 @@ bbCallBack_dyn.o: bbCallBack.c
 bbComm_dyn.o: bbComm.c
 	$(CC) $(CFLAGS) $^  -c -o $@
 
+bbDumpMsg_dyn.o: bbDumpMsg.c
+	$(CC) $(CFLAGS) $^  -c -o $@
+
 bbError_dyn.o: bbError.c
 	$(CC) $(CFLAGS) $^  -c -o $@
 

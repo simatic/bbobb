@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include "bbiomsg.h"
 #include "bbSignalArrival.h"
+#include "bbDumpMsg.h"
 // VAR STATICS setrecovered[], nbSetRcvd], waitingset
 // VAR EXTERNES view, sizeView, viewId, wavemax
 
@@ -126,9 +127,10 @@ void bbStateMachineTransition(BbSharedMsg* pSharedMsg){
 			       0,
 			       BB_LAST_STATE);
   }
-  //printf("In state \"%s\", automaton receives message \"%s\"\n", state2str[bbSingleton.automatonState], msg2str[pSharedMsg->msg.type]);
+  printf(">>>> In state \"%s\" (Wave = %d, Step = %d), automaton receives message \n", state2str[bbSingleton.automatonState], bbSingleton.currentWave, bbSingleton.currentStep);
+  bbDumpBbMsg(&(pSharedMsg->msg), 0);
   bbSingleton.automatonState = (*bbTransitions[bbSingleton.automatonState][pSharedMsg->msg.type])(bbSingleton.automatonState, pSharedMsg);
-  //printf("   Next state = \"%s\"\n", state2str[bbSingleton.automatonState]);
+  printf("---- Next state = \"%s\" (Wave = %d, Step = %d)\n", state2str[bbSingleton.automatonState], bbSingleton.currentWave, bbSingleton.currentStep);
 }
 
 BbState bbError(BbState state, BbSharedMsg* pSharedMsg){
@@ -248,6 +250,8 @@ void bbProcessPendingSets() {
         if (bbSingleton.reqOrder == TOTAL_ORDER){
             for (i = 0; i < MAX_MEMB; i++) {
                 if (rcvdBatch[bbSingleton.currentWave][i] != NULL){
+                    printf("In bbProcessPendingSets(),enqueue (for delivery) a batch from wave %d\n", bbSingleton.currentWave);
+                    bbDumpBatch(rcvdBatch[bbSingleton.currentWave][i]->batch, 0);
                     bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[bbSingleton.currentWave][i]);
                 }
             }
@@ -255,6 +259,8 @@ void bbProcessPendingSets() {
         else if (bbSingleton.reqOrder == UNIFORM_TOTAL_ORDER){
             for (i = 0; i < MAX_MEMB; i++) {
                 if (rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] != NULL){ 
+                    printf("In bbProcessPendingSets(), enqueue (for delivery) a batch from wave %d\n", PREV_WAVE(bbSingleton.currentWave));
+                    bbDumpBatch(rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]->batch, 0);
                     bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]);
                 }
             }
@@ -326,6 +332,14 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
     } else {
         // A process has arrived
         if (addrIsMine(bbSingleton.view.cv_joined)){
+            // We set again pBatchInSharedMsg->batch->sender because we
+            // have the following problem the very first time we call
+            // newEmptyBatchInNewSharedMsg() from bbSingletonInit() : trInit()
+            // has not been called yet. Thus, myAddress == -1.
+            // When we execute the next line, we are sure that myAddress is
+            // initialized.
+            bbSingleton.batchToSend->batch->sender = myAddress;
+
             // As current process is the joining process, it is responsible to 
             // bbOBroadcast this arrival information
             // If it was another process which bbOBroadcast this arrival
@@ -349,8 +363,11 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
         MUTEX_LOCK(bbSingleton.batchToSendMutex);
         BbSharedMsg *sharedSet = bbSingleton.batchToSend->sharedMsg;
         if (sharedSet->msg.body.set.batches[0].len > sizeof (BbBatch)) {
-            bqueueEnqueue(bbSingleton.batchesToDeliver, newBatchInSharedMsg(sharedSet->msg.body.set.batches, sharedSet));
-            bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(bbSingleton.batchMaxLen);
+            BbBatchInSharedMsg *pBatchInSharedMsg = newBatchInSharedMsg(sharedSet->msg.body.set.batches, sharedSet);
+            printf("In bbProcessViewChange(), enqueue (for delivery) a batch while alone\n");
+            bbDumpBatch(pBatchInSharedMsg->batch, 0);
+            bqueueEnqueue(bbSingleton.batchesToDeliver, pBatchInSharedMsg);
+            bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(offsetof(BbSharedMsg,msg.body.set.batches)+bbSingleton.batchMaxLen);
         }
         MUTEX_UNLOCK(bbSingleton.batchToSendMutex);
         pthread_cond_signal(&(bbSingleton.batchToSendCond));
@@ -377,20 +394,19 @@ void forceDeliver() {
     int i, j;
 
     if (bbSingleton.initDone) {
-
-
-        if (bbSingleton.reqOrder == UNIFORM_TOTAL_ORDER) {
-
-            for (i = 0; i < MAX_MEMB; i++) {//foreach key in rcvdBatch[wave-1].keys() do
-                if (rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] != NULL){ // TODO : METTRE A NULL
-                        //O-deliver(rcvdBatch[wave-1].get(key).msgs)
-                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]);
-                    }
+        for (i = 0; i < MAX_MEMB; i++) {//foreach key in rcvdBatch[wave-1].keys() do
+            if (rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] != NULL) { // TODO : METTRE A NULL
+                //O-deliver(rcvdBatch[wave-1].get(key).msgs)
+                printf("In forceDeliver(), enqueue (for delivery) a batch from wave %d\n", PREV_WAVE(bbSingleton.currentWave));
+                bbDumpBatch(rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]->batch, 0);
+                bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]);
             }
         }
         for (i = 0; i < MAX_MEMB; i++) {
             if (rcvdBatch[bbSingleton.currentWave][i] != NULL){ // TODO : METTRE A NULL
                     //O-deliver(rcvdBatch[wave].get(key).msgs)
+                printf("In forceDeliver(), enqueue (for delivery) a batch from wave %d\n", bbSingleton.currentWave);
+                bbDumpBatch(rcvdBatch[bbSingleton.currentWave][i]->batch, 0);
                 bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[bbSingleton.currentWave][i]);
                 }
         }
@@ -404,9 +420,10 @@ void forceDeliver() {
             for (i = 0; i < MAX_MEMB; i++) {
                 if (rcvdBatch[bbSingleton.currentWave][i] != NULL){ // TODO : METTRE A NULL
                         //O-deliver(rcvdBatch[waveMax].get(key).msgs) -> bqueueEnqueue
+                    printf("In forceDeliver(), enqueue (for delivery) a batch from wave %d\n", bbSingleton.currentWave);
+                    bbDumpBatch(rcvdBatch[bbSingleton.currentWave][i]->batch, 0);
                     bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[bbSingleton.currentWave][i]);
                     }
-
             }
         }
     } else {
@@ -433,7 +450,6 @@ void forceDeliver() {
     }
 
     bbSingleton.currentWave = NEXT_WAVE(waveMax);
-    printf("At the end of forceDeliver(), bbSingleton.currentWave = %d\n", bbSingleton.currentWave);
 }
 
 void sendBatchForStep0() {
@@ -442,13 +458,15 @@ void sendBatchForStep0() {
     MUTEX_LOCK(bbSingleton.batchToSendMutex);
     BbSharedMsg *sharedSet = bbSingleton.batchToSend->sharedMsg;
     if (sharedSet->msg.body.set.batches[0].len > sizeof (BbBatch)) {
-        rcvdBatch[bbSingleton.currentWave][addrToRank(myAddress)] = newBatchInSharedMsg(sharedSet->msg.body.set.batches, sharedSet);
+        BbBatchInSharedMsg *pBatchInSharedMsg = newBatchInSharedMsg(sharedSet->msg.body.set.batches, sharedSet);
+        printf("In sendBatchForStep0(), memorize and send a batch\n");
+        bbDumpBatch(pBatchInSharedMsg->batch, 0);
+        rcvdBatch[bbSingleton.currentWave][addrToRank(myAddress)] = pBatchInSharedMsg;
         sharedSet->msg.len = offsetof(BbMsg, body.set.batches) + sharedSet->msg.body.set.batches[0].len;
-        printf("sharedSet->msg.len = %d\n", sharedSet->msg.len);
     } else {
         sharedSet->msg.len = offsetof(BbMsg, body.set.batches);
     }
-    bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(bbSingleton.batchMaxLen); //modif
+    bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(offsetof(BbSharedMsg,msg.body.set.batches)+bbSingleton.batchMaxLen);
     MUTEX_UNLOCK(bbSingleton.batchToSendMutex);
     pthread_cond_signal(&(bbSingleton.batchToSendCond));
 

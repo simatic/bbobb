@@ -13,6 +13,7 @@
 #include "bqueue.h"
 #include "comm.h"
 #include "bbSharedMsg.h"
+#include "bbApplicationMessage.h"
 
 /**
 * @brief Data structure for BbState
@@ -52,6 +53,14 @@ int bbAutomatonInit();
 void * bbMsgTreatement(void* unused);
 
 /**
+ * @brief Builds and process a RECOVER Message
+ * @param[in] allocateMsg Function to be called to allocate the room for RECOVER Message
+ * @param[in] processMsg Function to be called to process the message, once it is ready
+ * @return a BbMsg set which contains all rcvdBatches of waveNum
+ */
+void buildAndProcess_RECOVER(AllocateMessageFunction allocateMsg, ProcessMessageFunction processMsg);
+
+/**
  * @brief create a BbMsg with all batches in rcvdBatch
  * @brief function uses in tOBroadcastRecover
  * @param[in] waveNum of wave in which to take batches
@@ -60,4 +69,9 @@ void * bbMsgTreatement(void* unused);
 BbMsg * createSet(unsigned char waveNum);
 
 void buildNewSet(BbMsg * pset, struct iovec * piov, int * piovcnt);
+
+/**
+* @brief Data structure holding received batchInSharedMsg in the different waves
+*/
+extern BbBatchInSharedMsg* rcvdBatch[NB_WAVE][MAX_MEMB];
 #endif /* _BB_STATE_MACHINE_H */

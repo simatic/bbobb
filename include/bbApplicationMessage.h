@@ -14,6 +14,8 @@
 #ifndef BBAPPLICATIONMESSAGE_H
 #define BBAPPLICATIONMESSAGE_H
 
+#include "applicationMessage.h"
+
 /**
  * @brief Request for a pointer on a new message with a payload of size @a payloadSize
  * @param[in] payloadSize Size requested for the @a payload field of the returned message
@@ -44,5 +46,26 @@ int bbOBroadcastWithoutMessageTypCheck(t_typ messageTyp, message *mp);
  * @param[in] null Unused parameter
  */
 void *bbODeliveries(void *null);
+
+/* It would be more logical to have the following two type in Trains applicationMessage.h
+   even though there are used only by BBOBB code */
+
+/** 
+ * @brief Type of function used by tOBroadcast_RECOVER() when it needs to allocate a message
+ * @note As tOBroadcast_RECOVER() is called with functions defined in applicationMessage.h, it
+ *       would be more logicial to have this type defined in applicationMessage.h. But, it is
+ *       required only in BBOBB. This is why we have it here.
+ */
+typedef  message* (*AllocateMessageFunction)(int);
+
+/** 
+ * @brief Type of function used by tOBroadcast_RECOVER() when it needs to process a message
+ * @note As tOBroadcast_RECOVER() is called with functions defined in applicationMessage.h, it
+ *       would be more logicial to have this type defined in applicationMessage.h. But, it is
+ *       required only in BBOBB. This is why we have it here.
+ */
+typedef  int (*ProcessMessageFunction)(t_typ, message*);
+
+
 #endif /* BBAPPLICATIONMESSAGE_H */
 

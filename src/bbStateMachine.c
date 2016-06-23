@@ -15,7 +15,7 @@
 // fonctions à faire: sizeview, newview
 //A ajouter = remplir waiting set, queue, etc
 static unsigned char waveMax;
-static BbBatchInSharedMsg* rcvdBatch[NB_WAVE][MAX_MEMB];
+BbBatchInSharedMsg* rcvdBatch[NB_WAVE][MAX_MEMB];
 static int nbRecoverRcvd; 
 static bool rcvdSet[NB_WAVE][NB_STEP];
 static trList *waitingSharedSets = NULL;
@@ -56,7 +56,6 @@ char *msg2str[]= {
 
 void forceDeliver();
 void sendBatchForStep0();
-void tOBroadcast_RECOVER();
 
 #define PREV_WAVE(wave) (wave > 0 ? wave - 1 : NB_WAVE - 1)
 #define NEXT_WAVE(wave) ((wave + 1) % NB_WAVE)
@@ -360,7 +359,7 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
     else {
         waveMax = bbSingleton.currentWave;
         nbRecoverRcvd = 0;
-        tOBroadcast_RECOVER();
+        buildAndProcess_RECOVER(newmsg, oBroadcast);
         return BB_STATE_VIEW_CHANGE;
     }
 }
@@ -562,7 +561,7 @@ void buildNewSet(BbMsg * pSet, struct iovec * iov, int * piovcnt) {
     *piovcnt = iovcnt;
 }
 
-void tOBroadcast_RECOVER() {
+void buildAndProcess_RECOVER(AllocateMessageFunction allocateMsg, ProcessMessageFunction processMsg) {
     BbMsg * fset = NULL;
     BbMsg * sset = NULL;
     
@@ -572,7 +571,7 @@ void tOBroadcast_RECOVER() {
     }
     
     int len = offsetof(BbMsg, body.recover.sets) + (bbSingleton.initDone ? fset->len + sset->len : 0);
-    message *mp = newmsg(len);
+    message *mp = (*allocateMsg)(len);
     
     BbMsg *msg = (BbMsg*)(mp->payload);
     msg->len = len;
@@ -588,7 +587,7 @@ void tOBroadcast_RECOVER() {
     } else {
         msg->body.recover.nbSets = 0;
     }
-    oBroadcast(FIRST_VALUE_AVAILABLE_FOR_MESS_TYP, mp);
+    (*processMsg)(FIRST_VALUE_AVAILABLE_FOR_MESS_TYP, mp);
     
     free(fset);
     fset = NULL;

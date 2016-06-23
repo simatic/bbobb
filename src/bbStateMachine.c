@@ -9,7 +9,11 @@
 #include <unistd.h>
 #include "bbiomsg.h"
 #include "bbSignalArrival.h"
+
+#define BB_TRACES 1
+#ifdef BB_TRACES
 #include "bbDumpMsg.h"
+#endif /* BB_TRACES */
 // VAR STATICS setrecovered[], nbSetRcvd], waitingset
 // VAR EXTERNES view, sizeView, viewId, wavemax
 
@@ -127,10 +131,15 @@ void bbStateMachineTransition(BbSharedMsg* pSharedMsg){
 			       0,
 			       BB_LAST_STATE);
   }
+#ifdef BB_TRACES
   printf(">>>> In state \"%s\" (Wave = %d, Step = %d), automaton receives message \n", state2str[bbSingleton.automatonState], bbSingleton.currentWave, bbSingleton.currentStep);
   bbDumpBbMsg(&(pSharedMsg->msg), 0);
+#endif /* BB_TRACES */
   bbSingleton.automatonState = (*bbTransitions[bbSingleton.automatonState][pSharedMsg->msg.type])(bbSingleton.automatonState, pSharedMsg);
+#ifdef BB_TRACES
   printf("---- Next state = \"%s\" (Wave = %d, Step = %d)\n", state2str[bbSingleton.automatonState], bbSingleton.currentWave, bbSingleton.currentStep);
+#endif /* BB_TRACES */
+
 }
 
 BbState bbError(BbState state, BbSharedMsg* pSharedMsg){
@@ -225,7 +234,7 @@ void bbProcessPendingSets() {
      
     int i;
 
-    while ((bbSingleton.currentStep > 0) && (rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep-1]) && (1<<bbSingleton.currentStep < bbSingleton.view.cv_nmemb)){
+    while ((rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep]) && (1<<bbSingleton.currentStep < bbSingleton.view.cv_nmemb)){
         BbMsg newSet;
         struct iovec iov[MAX_MEMB];
         int iovcnt = 0;
@@ -246,12 +255,14 @@ void bbProcessPendingSets() {
         }
         bbSingleton.currentStep++;
     }
-    if(1<<bbSingleton.currentStep >= bbSingleton.view.cv_nmemb){
+    if((1<<bbSingleton.currentStep >= bbSingleton.view.cv_nmemb) && (rcvdSet[bbSingleton.currentWave][bbSingleton.currentStep])){
         if (bbSingleton.reqOrder == TOTAL_ORDER){
             for (i = 0; i < MAX_MEMB; i++) {
                 if (rcvdBatch[bbSingleton.currentWave][i] != NULL){
+#ifdef BB_TRACES
                     printf("In bbProcessPendingSets(),enqueue (for delivery) a batch from wave %d\n", bbSingleton.currentWave);
                     bbDumpBatch(rcvdBatch[bbSingleton.currentWave][i]->batch, 0);
+#endif /* BB_TRACES */
                     bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[bbSingleton.currentWave][i]);
                 }
             }
@@ -259,8 +270,10 @@ void bbProcessPendingSets() {
         else if (bbSingleton.reqOrder == UNIFORM_TOTAL_ORDER){
             for (i = 0; i < MAX_MEMB; i++) {
                 if (rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] != NULL){ 
+#ifdef BB_TRACES
                     printf("In bbProcessPendingSets(), enqueue (for delivery) a batch from wave %d\n", PREV_WAVE(bbSingleton.currentWave));
                     bbDumpBatch(rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]->batch, 0);
+#endif /* BB_TRACES */
                     bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]);
                 }
             }
@@ -298,9 +311,6 @@ BbState bbProcessSet(BbState state, BbSharedMsg* pSharedMsg) {
             pBatch != NULL ;
             pBatch = getBatchInSharedMsg(pSharedMsg, pBatch, 0)   ) {
         rcvdBatch[pSharedMsg->msg.body.set.wave][addrToRank(pBatch->batch->sender)] = pBatch;
-    }
-    if (pSharedMsg->msg.body.set.step == bbSingleton.currentStep) {
-        bbSingleton.currentStep++;
     }
     bbProcessPendingSets();
     return state;
@@ -364,8 +374,10 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
         BbSharedMsg *sharedSet = bbSingleton.batchToSend->sharedMsg;
         if (sharedSet->msg.body.set.batches[0].len > sizeof (BbBatch)) {
             BbBatchInSharedMsg *pBatchInSharedMsg = newBatchInSharedMsg(sharedSet->msg.body.set.batches, sharedSet);
+#ifdef BB_TRACES
             printf("In bbProcessViewChange(), enqueue (for delivery) a batch while alone\n");
             bbDumpBatch(pBatchInSharedMsg->batch, 0);
+#endif /* BB_TRACES */
             bqueueEnqueue(bbSingleton.batchesToDeliver, pBatchInSharedMsg);
             bbSingleton.batchToSend = newEmptyBatchInNewSharedMsg(offsetof(BbSharedMsg,msg.body.set.batches)+bbSingleton.batchMaxLen);
         }
@@ -397,16 +409,20 @@ void forceDeliver() {
         for (i = 0; i < MAX_MEMB; i++) {//foreach key in rcvdBatch[wave-1].keys() do
             if (rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] != NULL) { // TODO : METTRE A NULL
                 //O-deliver(rcvdBatch[wave-1].get(key).msgs)
+#ifdef BB_TRACES
                 printf("In forceDeliver(), enqueue (for delivery) a batch from wave %d\n", PREV_WAVE(bbSingleton.currentWave));
                 bbDumpBatch(rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]->batch, 0);
+#endif /* BB_TRACES */
                 bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]);
             }
         }
         for (i = 0; i < MAX_MEMB; i++) {
             if (rcvdBatch[bbSingleton.currentWave][i] != NULL){ // TODO : METTRE A NULL
                     //O-deliver(rcvdBatch[wave].get(key).msgs)
+#ifdef BB_TRACES
                 printf("In forceDeliver(), enqueue (for delivery) a batch from wave %d\n", bbSingleton.currentWave);
                 bbDumpBatch(rcvdBatch[bbSingleton.currentWave][i]->batch, 0);
+#endif /* BB_TRACES */
                 bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[bbSingleton.currentWave][i]);
                 }
         }
@@ -420,8 +436,10 @@ void forceDeliver() {
             for (i = 0; i < MAX_MEMB; i++) {
                 if (rcvdBatch[bbSingleton.currentWave][i] != NULL){ // TODO : METTRE A NULL
                         //O-deliver(rcvdBatch[waveMax].get(key).msgs) -> bqueueEnqueue
+#ifdef BB_TRACES
                     printf("In forceDeliver(), enqueue (for delivery) a batch from wave %d\n", bbSingleton.currentWave);
                     bbDumpBatch(rcvdBatch[bbSingleton.currentWave][i]->batch, 0);
+#endif /* BB_TRACES */
                     bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[bbSingleton.currentWave][i]);
                     }
             }
@@ -459,8 +477,10 @@ void sendBatchForStep0() {
     BbSharedMsg *sharedSet = bbSingleton.batchToSend->sharedMsg;
     if (sharedSet->msg.body.set.batches[0].len > sizeof (BbBatch)) {
         BbBatchInSharedMsg *pBatchInSharedMsg = newBatchInSharedMsg(sharedSet->msg.body.set.batches, sharedSet);
+#ifdef BB_TRACES
         printf("In sendBatchForStep0(), memorize and send a batch\n");
         bbDumpBatch(pBatchInSharedMsg->batch, 0);
+#endif /* BB_TRACES */
         rcvdBatch[bbSingleton.currentWave][addrToRank(myAddress)] = pBatchInSharedMsg;
         sharedSet->msg.len = offsetof(BbMsg, body.set.batches) + sharedSet->msg.body.set.batches[0].len;
     } else {

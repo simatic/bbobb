@@ -65,6 +65,45 @@ void sendBatchForStep0();
 #define PREV_WAVE(wave) (wave > 0 ? wave - 1 : NB_WAVE - 1)
 #define NEXT_WAVE(wave) ((wave + 1) % NB_WAVE)
 
+/** 
+ * @brief Compares the values of waves @a and @b.
+ * @param[in] a First value to compare
+ * @param[in] b Second value to compare
+ * @return Returns respectively -1, 0, or 1, if a<b, a==b, and a>b. If
+ * a==UNITIALIZED_WAVE, returns respectively -1 or 0 if b!=UNITIALIZED_WAVE or
+ * b==UNITIALIZED_WAVE. If b==UNITIALIZED_WAVE and a!=UNITIALIZED_WAVE,
+ * returns 1.
+ */
+int waveCmp(unsigned char a, unsigned char b) {
+    if (a == UNITIALIZED_WAVE) {
+        if (b == UNITIALIZED_WAVE) {
+            return 0;
+        } else {
+            return -1;
+        }
+    } else if (b == UNITIALIZED_WAVE) {
+        return 1;
+    } else if (a == b) {
+        return 0;
+    } else if (a < b) {
+        if (b - a > NB_WAVE / 2) {
+            // a is smaller than b. But, because a is much smaller than b, it
+            // means that a has gone back to 0 because of an increment. So it is
+            // actually greater than b
+            return 1;
+        } else {
+            return -1;
+        }
+    } else {
+        // a > b
+        if (a - b > NB_WAVE / 2) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+}
+
 int bbAutomatonInit(){
     int i,j, error = 0;
     bbSingleton.automatonState = BB_STATE_START;
@@ -169,7 +208,7 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pSharedMsg) {//A CHANGER?
                 bbSingleton.viewId = pSharedMsg->msg.body.recover.viewId;
             }
             //nop(recoverRcvd[nbRecoverRcvd])->(body.recover.viewId)=pMsg->(body.recover.viewId);
-            if (pSharedMsg->msg.body.recover.sets[0].set.wave >= bbSingleton.currentWave) {//a voir comment acceder au set
+            if (waveCmp(pSharedMsg->msg.body.recover.sets[0].set.wave, bbSingleton.currentWave) >= 0) {
                 //foreach batch in set1.batches do
                 for (pBatch = getBatchInSharedMsg(pSharedMsg, NULL, 0) ;
                      pBatch != NULL ;
@@ -181,7 +220,7 @@ BbState bbProcessRecover(BbState state, BbSharedMsg* pSharedMsg) {//A CHANGER?
                     }
                 }
             }
-            if (pSet->wave > bbSingleton.currentWave) {
+            if (waveCmp(pSet->wave, waveMax) == 1) {
                 waveMax = pSet->wave;
             }
             for (pBatch = getBatchInSharedMsg(pSharedMsg, NULL, 1) ;
@@ -321,9 +360,6 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
     cleanList(waitingSharedSets);
     if (bbSingleton.initDone) {
         bbSingleton.viewId += 1;
-
-    } else {
-        bbSingleton.viewId += 0;
     }
 
     // We take into account the new view
@@ -367,6 +403,7 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
             forceDeliver();
         } else {
             bbSingleton.initDone = true;
+            bbSingleton.viewId = 0;
         }
         // We deliver batchToSend if it is not empty
         MUTEX_LOCK(bbSingleton.batchToSendMutex);
@@ -385,7 +422,7 @@ BbState bbProcessViewChange(BbState state, BbSharedMsg* pSharedMsg) {
         return BB_STATE_ALONE;
     }
     else {
-        waveMax = bbSingleton.currentWave;
+        waveMax = UNITIALIZED_WAVE;
         nbRecoverRcvd = 0;
         buildAndProcess_RECOVER(newmsg, oBroadcast);
         return BB_STATE_VIEW_CHANGE;
@@ -405,31 +442,29 @@ void forceDeliver() {
     int i, j;
 
     if (bbSingleton.initDone) {
-        for (i = 0; i < MAX_MEMB; i++) {//foreach key in rcvdBatch[wave-1].keys() do
-            if (rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] != NULL) { // TODO : METTRE A NULL
-                //O-deliver(rcvdBatch[wave-1].get(key).msgs)
+        if (bbSingleton.reqOrder == UNIFORM_TOTAL_ORDER) {
+            for (i = 0; i < MAX_MEMB; i++) {
+                if (rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i] != NULL) {
+                    //O-deliver(rcvdBatch[wave-1].get(key).msgs)
 #ifdef BB_TRACES
-                printf("In forceDeliver(), enqueue (for delivery) a batch from wave %d\n", PREV_WAVE(bbSingleton.currentWave));
-                bbDumpBatch(rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]->batch, 0);
+                    printf("In forceDeliver(), enqueue (for delivery) a batch from wave %d\n", PREV_WAVE(bbSingleton.currentWave));
+                    bbDumpBatch(rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]->batch, 0);
 #endif /* BB_TRACES */
-                bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]);
-            }
+                    bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[PREV_WAVE(bbSingleton.currentWave)][i]);
+                }
+            }            
         }
         for (i = 0; i < MAX_MEMB; i++) {
-            if (rcvdBatch[bbSingleton.currentWave][i] != NULL){ // TODO : METTRE A NULL
-                    //O-deliver(rcvdBatch[wave].get(key).msgs)
+            if (rcvdBatch[bbSingleton.currentWave][i] != NULL){
 #ifdef BB_TRACES
                 printf("In forceDeliver(), enqueue (for delivery) a batch from wave %d\n", bbSingleton.currentWave);
                 bbDumpBatch(rcvdBatch[bbSingleton.currentWave][i]->batch, 0);
 #endif /* BB_TRACES */
                 bqueueEnqueue(bbSingleton.batchesToDeliver, rcvdBatch[bbSingleton.currentWave][i]);
-                }
+            }
         }
-        //foreach key in rcvdBatch[wave].keys() do
-        //si causal order -> suprrimer
-        //if req_order != CAUSAL_ORDER or (reqOrder == CAUSAL_ORDER and delivBatch.get(key) != true) then
-        //O-deliver(rcvdBatch[wave].get(key).msgs) A FAIRE TOUT LE TEMPS
-        if (bbSingleton.currentWave < waveMax) {
+
+        if (waveCmp(bbSingleton.currentWave, waveMax) == -1) {
 
             //foreach key in rcvdBatch[waveMax].keys() do
             for (i = 0; i < MAX_MEMB; i++) {
@@ -443,8 +478,6 @@ void forceDeliver() {
                     }
             }
         }
-    } else {
-        bbSingleton.currentWave = waveMax;
     }
 
     for (i = 0; i < NB_WAVE ; i++) {
@@ -456,18 +489,17 @@ void forceDeliver() {
         }
     }
 
-    bbSingleton.initDone = true;
-    if (   ((waveMax > bbSingleton.currentWave) && (waveMax > bbSingleton.currentWave + 2))
-        || ((waveMax < bbSingleton.currentWave) && (waveMax + NB_WAVE > bbSingleton.currentWave + 2))){
+    if ( bbSingleton.initDone && (waveCmp(waveMax, bbSingleton.currentWave + 1) == 1) ) {
         bbErrorAtLineWithoutErrnum(EXIT_FAILURE,
                 __FILE__,
                 __LINE__,
-                "forceDeliver problem\n");
-
+                "forceDeliver problem : waveMax(== %d) is too big compared to bbSingleton.currentWave (== %d)\n",
+                waveMax,
+                bbSingleton.currentWave);
     }
 
+    bbSingleton.initDone = true;
     bbSingleton.currentWave = NEXT_WAVE(waveMax);
-    printf("CurrentWave = %d\n", bbSingleton.currentWave);
 }
 
 void sendBatchForStep0() {

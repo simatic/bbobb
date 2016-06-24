@@ -38,9 +38,9 @@ typedef struct {
 * @brief Data structure for BB_SET messages
 */
 typedef struct {
-  unsigned char wave; /**< Wave in which this set was sent */
-  unsigned char step; /**< Step in which this set was sent */
-  unsigned int viewId; /**<Id of current view */
+  unsigned char wave;   /**< Wave in which this set was sent */
+  unsigned char step;   /**< Step in which this set was sent */
+  unsigned char viewId; /**< Id of current view */
   BbBatch batches[];
 } __attribute__((packed)) BbSet;
 

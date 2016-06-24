@@ -27,7 +27,9 @@ typedef enum {
 
 #define BB_LAST_STATE BB_STATE_VIEW_CHANGE
 
-#define NB_WAVE 256
+#define NB_WAVE 127
+
+#define UNITIALIZED_WAVE (NB_WAVE + 1)
 
 #define NB_STEP (MAX_MEMB / 2) /**< Maximum number of steps (theoretically Log_2(MAX_MEMB), but approximated to (MAX_MEMB / 2) as Log is not available with #define) */
 
